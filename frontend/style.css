@@ -524,6 +524,35 @@ body {
   right: 12px;
 }
 
+.post-image-flair {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  background-color: rgba(94, 38, 140, 0.9);
+  color: #FFFFFF;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  padding: 3px 10px;
+  border-radius: 12px;
+  z-index: 2;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
+}
+
+.post-flair-inline {
+  display: inline-flex;
+  align-items: center;
+  background-color: #EDEFF1;
+  color: #576F76;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 12px;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+}
+
 .carousel-indicator-dots {
   position: absolute;
   bottom: 10px;

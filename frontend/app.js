@@ -382,15 +382,20 @@ function renderPosts(posts) {
       `;
     }
 
+    const flairCategories = ['SYSTEMS', 'KERNEL', 'DISTRIBUTED', 'HARDWARE', 'DATABASE', 'PERFORMANCE'];
+    const flairText = flairCategories[post.id % flairCategories.length];
+
     let mediaHtml = '';
     if (post.image_url) {
       mediaHtml = `
         <div class="post-image-carousel">
           <img src="${resolveUrl(escapeHtml(post.image_url))}" alt="Post Media" loading="lazy">
+          <div class="post-image-flair">${flairText}</div>
           <button class="carousel-arrow-btn prev-btn" aria-label="Previous image">‹</button>
           <button class="carousel-arrow-btn next-btn" aria-label="Next image">›</button>
           <div class="carousel-indicator-dots">
             <span class="indicator-dot active"></span>
+            <span class="indicator-dot"></span>
             <span class="indicator-dot"></span>
             <span class="indicator-dot"></span>
           </div>
@@ -415,6 +420,9 @@ function renderPosts(posts) {
         <div class="post-header-left">
           <div class="community-icon-circle">r/</div>
           <span class="community-handle-bold" data-community="INCREDIBLE_x_TECH">r/INCREDIBLE_x_TECH</span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="#FF4500" style="margin-left: 2px; margin-right: 2px; vertical-align: middle;">
+            <path d="M12 2a1 1 0 0 1 1 1v1.07A8.002 8.002 0 0 1 20 12a7.97 7.97 0 0 1-1.3 4.36l1.24 1.25a1 1 0 0 1-1.42 1.41l-1.29-1.29A7.953 7.953 0 0 1 12 20a7.953 7.953 0 0 1-5.23-2.27l-1.29 1.29a1 1 0 0 1-1.42-1.41l1.24-1.25A7.97 7.97 0 0 1 4 12a8.002 8.002 0 0 1 7-7.93V3a1 1 0 0 1 1-1zm0 4a6 6 0 1 0 0 12 6 6 0 0 0 0-12zm-3 5a1.25 1.25 0 1 1 0 2.5 1.25 1.25 0 0 1 0-2.5zm6 0a1.25 1.25 0 1 1 0 2.5 1.25 1.25 0 0 1 0-2.5zm-5 4a3.99 3.99 0 0 0 4 0 1 1 0 1 1 1 1.73 5.99 5.99 0 0 1-6 0 1 1 0 1 1 1-1.73z"/>
+          </svg>
           <span>•</span>
           <span class="post-time-text">${timeAgo(post.created_at)}</span>
           <span>•</span>
