@@ -45,6 +45,26 @@
         <option value="">Switch Demo Account</option>
       </select>
 
+      <button class="reddit-nav-icon-btn d-none d-md-flex" id="navDiscoverBtn" title="Popular Topics">
+        <svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor">
+          <path d="M10 2a8 8 0 1 0 8 8 8 8 0 0 0-8-8zm2.83 5.17l-1.41 4.24-4.24 1.42 1.41-4.25 4.24-1.41z"/>
+        </svg>
+      </button>
+
+      <button class="reddit-nav-icon-btn d-none d-md-flex" id="navChatBtn" title="Chat">
+        <svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor">
+          <path d="M10 2C5.58 2 2 5.13 2 9c0 1.94.88 3.7 2.33 4.98L3.5 18l4.4-1.47C8.59 16.8 9.28 17 10 17c4.42 0 8-3.13 8-7s-3.58-7-8-7z"/>
+        </svg>
+        <span class="reddit-badge-counter">2</span>
+      </button>
+
+      <button class="reddit-nav-icon-btn d-none d-md-flex" id="navBellBtn" title="Notifications">
+        <svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor">
+          <path d="M10 2a4 4 0 0 0-4 4v3.58L4.29 12.3A1 1 0 0 0 5 14h10a1 1 0 0 0 .71-1.7L14 9.58V6a4 4 0 0 0-4-4zm-2 13a2 2 0 0 0 4 0H8z"/>
+        </svg>
+        <span class="reddit-badge-counter">3</span>
+      </button>
+
       <div id="loggedOutButtons" class="d-flex align-items-center gap-2">
         <button class="btn-reddit-bordered" id="openLoginBtn">Log In</button>
         <button class="btn-reddit-solid" id="openSignupBtn">Sign Up</button>
@@ -59,7 +79,10 @@
         </button>
 
         <div class="user-account-dropdown" id="navProfilePill" role="button">
-          <img class="account-avatar" id="navUserAvatar" src="/media/avatar1.jpg" alt="User">
+          <div class="account-avatar-wrapper">
+            <img class="account-avatar" id="navUserAvatar" src="/media/avatar1.jpg" alt="User">
+            <div class="online-dot"></div>
+          </div>
           <div class="account-names d-none d-sm-flex">
             <span class="account-handle" id="navUserName">User</span>
             <span class="account-karma" id="navUserKarma">0 karma</span>
@@ -67,9 +90,23 @@
           <svg width="12" height="12" viewBox="0 0 20 20" fill="#787C7E">
             <path d="M5 7l5 5 5-5z"/>
           </svg>
-        </div>
 
-        <button class="btn btn-light btn-sm border" id="logoutBtn" style="border-radius: 20px;">Logout</button>
+          <div class="reddit-user-menu-flyout d-none" id="userMenuFlyout">
+            <button class="reddit-user-menu-item" id="menuItemProfile">
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4zm-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h10z"/></svg>
+              View Profile
+            </button>
+            <button class="reddit-user-menu-item" id="menuItemSettings">
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M8 4.754a3.246 3.246 0 1 0 0 6.492 3.246 3.246 0 0 0 0-6.492zM5.754 8a2.246 2.246 0 1 1 4.492 0 2.246 2.246 0 0 1-4.492 0z"/></svg>
+              User Settings
+            </button>
+            <div class="reddit-menu-divider"></div>
+            <button class="reddit-user-menu-item" id="menuItemLogout">
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path fill-rule="evenodd" d="M10 12.5a.5.5 0 0 1-.5.5h-8a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5h8a.5.5 0 0 1 .5.5v2a.5.5 0 0 0 1 0v-2A1.5 1.5 0 0 0 9.5 2h-8A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h8a1.5 1.5 0 0 0 1.5-1.5v-2a.5.5 0 0 0-1 0v2z"/><path fill-rule="evenodd" d="M15.854 8.354a.5.5 0 0 0 0-.708l-3-3a.5.5 0 0 0-.708.708L14.293 7.5H5.5a.5.5 0 0 0 0 1h8.793l-2.147 2.146a.5.5 0 0 0 .708.708l3-3z"/></svg>
+              Log Out
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   </header>
@@ -85,12 +122,18 @@
           <span class="community-handle-tag">r/INCREDIBLE_x_TECH</span>
         </div>
         <button class="reddit-join-btn joined" id="headerJoinBtn">Joined</button>
+        <button class="btn btn-light btn-sm border" id="headerBellBtn" style="border-radius: 50%; width: 32px; height: 32px; padding: 0;" title="Community Notifications">
+          <svg width="14" height="14" viewBox="0 0 20 20" fill="currentColor">
+            <path d="M10 2a4 4 0 0 0-4 4v3.58L4.29 12.3A1 1 0 0 0 5 14h10a1 1 0 0 0 .71-1.7L14 9.58V6a4 4 0 0 0-4-4zm-2 13a2 2 0 0 0 4 0H8z"/>
+          </svg>
+        </button>
       </div>
     </div>
     <div class="reddit-nav-tabs-strip">
       <a href="#" class="reddit-subtab active" id="subtabPosts">Posts</a>
       <a href="#" class="reddit-subtab" id="subtabRules">Community Rules</a>
       <a href="#" class="reddit-subtab" id="subtabWiki">Wiki</a>
+      <a href="#" class="reddit-subtab" id="subtabGuidelines">Architecture Guidelines</a>
       <a href="#" class="reddit-subtab" id="subtabFaq">FAQ</a>
     </div>
   </div>
@@ -100,36 +143,48 @@
       <div class="quick-create-card" id="feedCreateTrigger" role="button">
         <img class="quick-create-avatar" id="triggerAvatar" src="/media/avatar1.jpg" alt="User">
         <div class="quick-create-input">Create Post</div>
-        <button class="quick-create-media-btn" title="Create Image Post">
+        <button class="quick-create-media-btn" id="quickImageBtn" title="Create Image Post">
           <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
             <path d="M4 3a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2H4zm12 12H4l4-5 3 3.5 2-2.5 3 4z"/>
+          </svg>
+        </button>
+        <button class="quick-create-media-btn" id="quickLinkBtn" title="Share Technical Paper">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+            <path d="M12.586 4.586a2 2 0 1 1 2.828 2.828l-3 3a2 2 0 0 1-2.828 0 1 1 0 0 0-1.414 1.414 4 4 0 0 0 5.656 0l3-3a4 4 0 0 0-5.656-5.656l-1.5 1.5a1 1 0 1 0 1.414 1.414l1.5-1.5zm-5.172 10.828a2 2 0 0 1-2.828-2.828l3-3a2 2 0 0 1 2.828 0 1 1 0 1 0 1.414-1.414 4 4 0 0 0-5.656 0l-3 3a4 4 0 1 0 5.656 5.656l1.5-1.5a1 1 0 0 0-1.414-1.414l-1.5 1.5z"/>
           </svg>
         </button>
       </div>
 
       <div class="feed-sort-bar">
-        <button class="sort-pill active" data-sort="hot" id="sortHotBtn">
-          <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor">
-            <path d="M12.3 2.1c-.2-.1-.5 0-.6.2C10.7 4.2 9.5 6 9.5 7.8c0 .2 0 .4.1.6C8.8 7.6 8 6.4 8 5.1c0-.3-.2-.5-.5-.5s-.4.2-.5.4C5.7 7.7 4.5 10 4.5 12.3 4.5 16.5 7.9 20 12 20s7.5-3.5 7.5-7.7c0-4.6-3.8-8.5-7.2-10.2zm-.3 15.9c-2.8 0-5-2.2-5-5 0-1.2.5-2.5 1.2-3.6.4 2.2 2 3.6 4.1 3.6.3 0 .5-.2.5-.5 0-1.4.6-2.7 1.6-3.6 1.7 1.8 2.6 4.2 2.6 6.1 0 2.8-2.2 5-5 5z"/>
-          </svg>
-          Hot
-        </button>
-        <button class="sort-pill" data-sort="new" id="sortNewBtn">
-          <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor">
-            <path d="M10 2a8 8 0 1 0 8 8 8 8 0 0 0-8-8zm1 8.5v3.5a1 1 0 0 1-2 0v-4a1 1 0 0 1 1-1h4a1 1 0 0 1 0 2h-3z"/>
-          </svg>
-          New
-        </button>
-        <button class="sort-pill" data-sort="top" id="sortTopBtn">
-          <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor">
-            <path d="M4 11a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-6zm5-5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v11a1 1 0 0 1-1 1h-2a1 1 0 0 1-1-1V6zm5-3a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-2a1 1 0 0 1-1-1V3z"/>
-          </svg>
-          Top
-        </button>
+        <div class="sort-pills-wrap">
+          <button class="sort-pill active" data-sort="hot" id="sortHotBtn">
+            <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor">
+              <path d="M12.3 2.1c-.2-.1-.5 0-.6.2C10.7 4.2 9.5 6 9.5 7.8c0 .2 0 .4.1.6C8.8 7.6 8 6.4 8 5.1c0-.3-.2-.5-.5-.5s-.4.2-.5.4C5.7 7.7 4.5 10 4.5 12.3 4.5 16.5 7.9 20 12 20s7.5-3.5 7.5-7.7c0-4.6-3.8-8.5-7.2-10.2zm-.3 15.9c-2.8 0-5-2.2-5-5 0-1.2.5-2.5 1.2-3.6.4 2.2 2 3.6 4.1 3.6.3 0 .5-.2.5-.5 0-1.4.6-2.7 1.6-3.6 1.7 1.8 2.6 4.2 2.6 6.1 0 2.8-2.2 5-5 5z"/>
+            </svg>
+            Hot
+          </button>
+          <button class="sort-pill" data-sort="new" id="sortNewBtn">
+            <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor">
+              <path d="M10 2a8 8 0 1 0 8 8 8 8 0 0 0-8-8zm1 8.5v3.5a1 1 0 0 1-2 0v-4a1 1 0 0 1 1-1h4a1 1 0 0 1 0 2h-3z"/>
+            </svg>
+            New
+          </button>
+          <button class="sort-pill" data-sort="top" id="sortTopBtn">
+            <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor">
+              <path d="M4 11a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-6zm5-5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v11a1 1 0 0 1-1 1h-2a1 1 0 0 1-1-1V6zm5-3a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-2a1 1 0 0 1-1-1V3z"/>
+            </svg>
+            Top
+          </button>
+        </div>
+        <span class="feed-count-tag" id="feedCountTag">15 Technical Discussions</span>
       </div>
 
       <div id="postsFeed">
         <div class="reddit-post-card p-4 text-center text-secondary">Loading posts...</div>
+      </div>
+
+      <div class="load-more-section">
+        <button class="btn-reddit-bordered" id="loadMorePostsBtn">Load More Discussions</button>
       </div>
     </main>
 
@@ -156,6 +211,13 @@
           </div>
           <div class="text-secondary" style="font-size: 12px;">Created Oct 26, 2026</div>
           <button class="btn-reddit-solid w-100 justify-content-center" id="sidebarCreateBtn">Create Post</button>
+          <div class="community-topics-wrap">
+            <span class="community-topic-pill">Distributed Systems</span>
+            <span class="community-topic-pill">Low Latency</span>
+            <span class="community-topic-pill">Kernel</span>
+            <span class="community-topic-pill">Microarchitecture</span>
+            <span class="community-topic-pill">Wasm</span>
+          </div>
         </div>
       </div>
 
@@ -210,6 +272,8 @@
           <div class="d-flex flex-column gap-2" style="font-size: 13px;">
             <a href="#" class="author-link fw-bold" data-username="alex_tech">u/alex_tech</a>
             <a href="#" class="author-link fw-bold" data-username="sarah_dev">u/sarah_dev</a>
+            <a href="#" class="author-link fw-bold" data-username="marcus_ai">u/marcus_ai</a>
+            <a href="#" class="author-link fw-bold" data-username="elena_code">u/elena_code</a>
           </div>
         </div>
       </div>
@@ -241,7 +305,7 @@
         <div class="modal-body p-3">
           <form id="authForm" class="d-flex flex-column gap-3">
             <div id="displayNameGroup" class="d-none flex-column gap-1">
-              <label class="form-label text-uppercase fw-bold text-secondary mb-0" style="font-size: 11px;" for="authDisplayName">Display Name</label>
+              <label class="form-label text-uppercase fw-bold text-secondary mb-0" style="font-size: 11px;" for="authDisplayName">Display Name (Optional)</label>
               <input type="text" class="form-control" id="authDisplayName" placeholder="e.g. Alex Rivera">
             </div>
             <div class="d-flex flex-column gap-1">

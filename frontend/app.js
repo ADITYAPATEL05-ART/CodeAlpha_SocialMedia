@@ -7,6 +7,7 @@ let freeMediaList = [];
 let selectedMediaUrl = '';
 let currentProfileUsername = null;
 let currentProfileTab = 'posts';
+let postsOffset = 0;
 
 const brandLogoBtn = document.getElementById('brandLogoBtn');
 const searchInput = document.getElementById('searchInput');
@@ -21,19 +22,33 @@ const navUserAvatar = document.getElementById('navUserAvatar');
 const navUserName = document.getElementById('navUserName');
 const navUserKarma = document.getElementById('navUserKarma');
 const logoutBtn = document.getElementById('logoutBtn');
+const userMenuFlyout = document.getElementById('userMenuFlyout');
+const menuItemProfile = document.getElementById('menuItemProfile');
+const menuItemSettings = document.getElementById('menuItemSettings');
+const menuItemLogout = document.getElementById('menuItemLogout');
 
+const navDiscoverBtn = document.getElementById('navDiscoverBtn');
+const navChatBtn = document.getElementById('navChatBtn');
+const navBellBtn = document.getElementById('navBellBtn');
 const headerJoinBtn = document.getElementById('headerJoinBtn');
+const headerBellBtn = document.getElementById('headerBellBtn');
+
 const subtabPosts = document.getElementById('subtabPosts');
 const subtabRules = document.getElementById('subtabRules');
 const subtabWiki = document.getElementById('subtabWiki');
+const subtabGuidelines = document.getElementById('subtabGuidelines');
 const subtabFaq = document.getElementById('subtabFaq');
 
 const feedCreateTrigger = document.getElementById('feedCreateTrigger');
 const triggerAvatar = document.getElementById('triggerAvatar');
+const quickImageBtn = document.getElementById('quickImageBtn');
+const quickLinkBtn = document.getElementById('quickLinkBtn');
 const sortHotBtn = document.getElementById('sortHotBtn');
 const sortNewBtn = document.getElementById('sortNewBtn');
 const sortTopBtn = document.getElementById('sortTopBtn');
+const feedCountTag = document.getElementById('feedCountTag');
 const postsFeed = document.getElementById('postsFeed');
+const loadMorePostsBtn = document.getElementById('loadMorePostsBtn');
 
 const sidebarCreateBtn = document.getElementById('sidebarCreateBtn');
 const sidebarUserBox = document.getElementById('sidebarUserBox');
@@ -161,6 +176,17 @@ function escapeHtml(text) {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#039;');
+}
+
+function getFlairForPost(title) {
+  const lower = title.toLowerCase();
+  if (lower.includes('kernel') || lower.includes('ebpf') || lower.includes('linux')) return 'Kernel';
+  if (lower.includes('hardware') || lower.includes('cpu') || lower.includes('gpu')) return 'Hardware';
+  if (lower.includes('wasm') || lower.includes('runtime')) return 'Runtimes';
+  if (lower.includes('distributed') || lower.includes('raft') || lower.includes('cache')) return 'Distributed Systems';
+  if (lower.includes('storage') || lower.includes('database') || lower.includes('wal') || lower.includes('postgres')) return 'Databases';
+  if (lower.includes('lock-free') || lower.includes('c++') || lower.includes('concurrency')) return 'Concurrency';
+  return 'Architecture';
 }
 
 async function fetchMe() {
@@ -293,18 +319,22 @@ function renderFreeMediaGrid() {
 }
 
 async function loadPosts() {
-  postsFeed.innerHTML = '<div class="reddit-post-card p-4 text-center text-secondary">Loading posts...</div>';
+  postsFeed.innerHTML = '<div class="reddit-post-card p-4 text-center text-secondary">Loading discussions...</div>';
   try {
     const url = `${API_BASE}/api/posts?sort=${currentSort}&search=${encodeURIComponent(currentSearch)}`;
     const res = await fetch(url, { headers: getAuthHeader() });
     const data = await res.json();
     renderPosts(data.posts || []);
   } catch (err) {
-    postsFeed.innerHTML = '<div class="reddit-post-card p-4 text-center text-danger">Failed to load posts. Please try again.</div>';
+    postsFeed.innerHTML = '<div class="reddit-post-card p-4 text-center text-danger">Failed to load discussions. Please try again.</div>';
   }
 }
 
 function renderPosts(posts) {
+  if (feedCountTag) {
+    feedCountTag.textContent = `${posts.length} Technical Discussions`;
+  }
+
   if (posts.length === 0) {
     postsFeed.innerHTML = `
       <div class="reddit-post-card p-4 text-center text-secondary">
@@ -325,6 +355,7 @@ function renderPosts(posts) {
     const isDownvoted = post.user_vote === -1;
     const isAuthor = currentUser && currentUser.id === post.author.id;
     const isFollowing = post.author.is_following;
+    const flair = getFlairForPost(post.title);
 
     let followBtnHtml = '';
     if (currentUser && !isAuthor) {
@@ -367,6 +398,7 @@ function renderPosts(posts) {
       <div class="post-content-container">
         <div class="post-top-meta">
           <span class="community-name-link">r/INCREDIBLE_x_TECH</span>
+          <span class="post-flair-badge">${flair}</span>
           <span>•</span>
           <span>Posted by</span>
           <span class="author-link" data-username="${escapeHtml(post.author.username)}">u/${escapeHtml(post.author.username)}</span>
@@ -736,16 +768,18 @@ authForm.addEventListener('submit', async (e) => {
   }
 });
 
-logoutBtn.addEventListener('click', async () => {
-  try {
-    await fetch(`${API_BASE}/api/auth/logout`, { method: 'POST', headers: getAuthHeader() });
-  } catch (err) {}
+function handleLogout() {
+  fetch(`${API_BASE}/api/auth/logout`, { method: 'POST', headers: getAuthHeader() }).catch(() => {});
   localStorage.removeItem('auth_token');
   currentUser = null;
+  userMenuFlyout.classList.add('d-none');
   updateAuthUI();
   loadPosts();
   showToast('Logged out');
-});
+}
+
+logoutBtn.addEventListener('click', handleLogout);
+menuItemLogout.addEventListener('click', handleLogout);
 
 function openCreateModal() {
   if (!currentUser) {
@@ -762,6 +796,8 @@ function openCreateModal() {
 }
 
 feedCreateTrigger.addEventListener('click', openCreateModal);
+quickImageBtn.addEventListener('click', openCreateModal);
+quickLinkBtn.addEventListener('click', openCreateModal);
 navbarCreateBtn.addEventListener('click', openCreateModal);
 sidebarCreateBtn.addEventListener('click', openCreateModal);
 
@@ -853,6 +889,7 @@ async function openUserProfile(username) {
   currentProfileUsername = username;
   currentProfileTab = 'posts';
   profileEditSection.classList.add('d-none');
+  userMenuFlyout.classList.add('d-none');
   if (bsProfileModal) bsProfileModal.show();
   await refreshProfileView();
 }
@@ -1099,12 +1136,45 @@ function renderUserList(users, emptyMessage) {
   });
 }
 
-navProfilePill.addEventListener('click', () => {
+navProfilePill.addEventListener('click', (e) => {
+  e.stopPropagation();
+  userMenuFlyout.classList.toggle('d-none');
+});
+
+menuItemProfile.addEventListener('click', () => {
+  userMenuFlyout.classList.add('d-none');
   if (currentUser) openUserProfile(currentUser.username);
+});
+
+menuItemSettings.addEventListener('click', () => {
+  userMenuFlyout.classList.add('d-none');
+  if (currentUser) {
+    openUserProfile(currentUser.username);
+    profileEditSection.classList.remove('d-none');
+  }
 });
 
 sidebarViewProfileBtn.addEventListener('click', () => {
   if (currentUser) openUserProfile(currentUser.username);
+});
+
+navDiscoverBtn.addEventListener('click', () => {
+  currentSort = 'hot';
+  updateSortButtons();
+  loadPosts();
+  showToast('Filtered to trending technical discussions');
+});
+
+navChatBtn.addEventListener('click', () => {
+  showToast('Chat channels: #distributed-systems, #kernel-dev, #gpu-compute');
+});
+
+navBellBtn.addEventListener('click', () => {
+  showToast('Notifications: 3 new technical responses on your benchmarks');
+});
+
+headerBellBtn.addEventListener('click', () => {
+  showToast('Community notifications enabled for r/INCREDIBLE_x_TECH');
 });
 
 headerJoinBtn.addEventListener('click', () => {
@@ -1124,6 +1194,7 @@ subtabPosts.addEventListener('click', (e) => {
   subtabPosts.classList.add('active');
   subtabRules.classList.remove('active');
   subtabWiki.classList.remove('active');
+  subtabGuidelines.classList.remove('active');
   subtabFaq.classList.remove('active');
   currentSort = 'hot';
   updateSortButtons();
@@ -1135,18 +1206,29 @@ subtabRules.addEventListener('click', (e) => {
   subtabPosts.classList.remove('active');
   subtabRules.classList.add('active');
   subtabWiki.classList.remove('active');
+  subtabGuidelines.classList.remove('active');
   subtabFaq.classList.remove('active');
-  showToast('Viewing community rules');
+  showToast('Displaying community moderation standards');
 });
 
 subtabWiki.addEventListener('click', (e) => {
   e.preventDefault();
-  showToast('Wiki documentation: High-Performance Systems & Modern Architecture');
+  showToast('Wiki: Production Systems Architecture & Distributed Systems');
+});
+
+subtabGuidelines.addEventListener('click', (e) => {
+  e.preventDefault();
+  showToast('Guidelines: Reproducible benchmarks, memory alignment, and zero-allocation');
 });
 
 subtabFaq.addEventListener('click', (e) => {
   e.preventDefault();
-  showToast('Frequently Asked Questions: Community moderation and technical guidelines');
+  showToast('FAQ: Technical discussions, verification procedures, and citations');
+});
+
+loadMorePostsBtn.addEventListener('click', () => {
+  showToast('All 15 production discussions loaded in full feed');
+  window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
 });
 
 document.querySelectorAll('[data-username]').forEach(el => {
@@ -1219,6 +1301,14 @@ linkPrivacyPolicy.addEventListener('click', (e) => {
 linkContentPolicy.addEventListener('click', (e) => {
   e.preventDefault();
   if (bsTosModal) bsTosModal.show();
+});
+
+window.addEventListener('click', (e) => {
+  if (userMenuFlyout && !userMenuFlyout.classList.contains('d-none')) {
+    if (!navProfilePill.contains(e.target)) {
+      userMenuFlyout.classList.add('d-none');
+    }
+  }
 });
 
 async function initApp() {
