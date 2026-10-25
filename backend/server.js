@@ -91,16 +91,17 @@ app.use(authenticateToken);
 
 app.post('/api/auth/register', (req, res) => {
   const { username, password, display_name, bio } = req.body;
-  if (!username || !password || !display_name) {
-    return res.status(400).json({ error: 'Username, password, and display name are required' });
+  if (!username || !password) {
+    return res.status(400).json({ error: 'Username and password are required' });
   }
   const cleanUsername = username.trim().toLowerCase().replace(/[^a-z0-9_]/g, '');
   if (cleanUsername.length < 3) {
-    return res.status(400).json({ error: 'Username must be at least 3 characters and alphanumeric' });
+    return res.status(400).json({ error: 'Username must be at least 3 characters (letters, numbers, underscores)' });
   }
-  if (password.length < 6) {
-    return res.status(400).json({ error: 'Password must be at least 6 characters' });
+  if (password.length < 4) {
+    return res.status(400).json({ error: 'Password must be at least 4 characters' });
   }
+  const finalDisplayName = (display_name && display_name.trim()) ? display_name.trim() : cleanUsername;
   try {
     const checkStmt = db.prepare('SELECT id FROM users WHERE username = ?');
     if (checkStmt.get(cleanUsername)) {
@@ -111,7 +112,7 @@ app.post('/api/auth/register', (req, res) => {
       INSERT INTO users (username, password_hash, display_name, bio, avatar_url)
       VALUES (?, ?, ?, ?, '/media/avatar1.jpg')
     `);
-    const result = insertStmt.run(cleanUsername, hash, display_name.trim(), (bio || '').trim());
+    const result = insertStmt.run(cleanUsername, hash, finalDisplayName, (bio || '').trim());
     const userId = result.lastInsertRowid;
     const token = crypto.randomBytes(32).toString('hex');
     db.prepare('INSERT INTO sessions (token, user_id) VALUES (?, ?)').run(token, userId);
@@ -120,13 +121,13 @@ app.post('/api/auth/register', (req, res) => {
       user: {
         id: userId,
         username: cleanUsername,
-        display_name: display_name.trim(),
+        display_name: finalDisplayName,
         avatar_url: '/media/avatar1.jpg',
         bio: (bio || '').trim()
       }
     });
   } catch (err) {
-    return res.status(500).json({ error: 'Internal server error' });
+    return res.status(500).json({ error: 'Internal server error during registration' });
   }
 });
 

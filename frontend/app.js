@@ -706,7 +706,8 @@ authForm.addEventListener('submit', async (e) => {
   };
 
   if (isSignup) {
-    payload.display_name = authDisplayName.value.trim();
+    const disp = authDisplayName.value.trim();
+    payload.display_name = disp || authUsername.value.trim();
     payload.bio = authBio.value.trim();
   }
 
@@ -730,7 +731,7 @@ authForm.addEventListener('submit', async (e) => {
       authError.classList.remove('d-none');
     }
   } catch (err) {
-    authError.textContent = 'Network or server error';
+    authError.textContent = 'Unable to connect to the server. Please verify backend is running on port 3000.';
     authError.classList.remove('d-none');
   }
 });
