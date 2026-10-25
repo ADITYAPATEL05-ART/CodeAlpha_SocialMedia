@@ -22,6 +22,12 @@ const navUserName = document.getElementById('navUserName');
 const navUserKarma = document.getElementById('navUserKarma');
 const logoutBtn = document.getElementById('logoutBtn');
 
+const headerJoinBtn = document.getElementById('headerJoinBtn');
+const subtabPosts = document.getElementById('subtabPosts');
+const subtabRules = document.getElementById('subtabRules');
+const subtabWiki = document.getElementById('subtabWiki');
+const subtabFaq = document.getElementById('subtabFaq');
+
 const feedCreateTrigger = document.getElementById('feedCreateTrigger');
 const triggerAvatar = document.getElementById('triggerAvatar');
 const sortHotBtn = document.getElementById('sortHotBtn');
@@ -287,21 +293,21 @@ function renderFreeMediaGrid() {
 }
 
 async function loadPosts() {
-  postsFeed.innerHTML = '<div class="card p-4 text-center text-secondary">Loading posts...</div>';
+  postsFeed.innerHTML = '<div class="reddit-post-card p-4 text-center text-secondary">Loading posts...</div>';
   try {
     const url = `${API_BASE}/api/posts?sort=${currentSort}&search=${encodeURIComponent(currentSearch)}`;
     const res = await fetch(url, { headers: getAuthHeader() });
     const data = await res.json();
     renderPosts(data.posts || []);
   } catch (err) {
-    postsFeed.innerHTML = '<div class="card p-4 text-center text-danger">Failed to load posts. Please try again.</div>';
+    postsFeed.innerHTML = '<div class="reddit-post-card p-4 text-center text-danger">Failed to load posts. Please try again.</div>';
   }
 }
 
 function renderPosts(posts) {
   if (posts.length === 0) {
     postsFeed.innerHTML = `
-      <div class="card p-4 text-center text-secondary">
+      <div class="reddit-post-card p-4 text-center text-secondary">
         <h5 class="text-dark fw-bold">No Technical Discussions Found</h5>
         <p class="mb-0">There are no posts matching your filter. Be the first to share an engineering architecture post.</p>
       </div>
@@ -312,7 +318,7 @@ function renderPosts(posts) {
   postsFeed.innerHTML = '';
   posts.forEach(post => {
     const card = document.createElement('article');
-    card.className = 'post-card';
+    card.className = 'reddit-post-card';
     card.id = `post-${post.id}`;
 
     const isUpvoted = post.user_vote === 1;
@@ -323,7 +329,7 @@ function renderPosts(posts) {
     let followBtnHtml = '';
     if (currentUser && !isAuthor) {
       followBtnHtml = `
-        <button class="btn btn-sm ${isFollowing ? 'btn-light border' : 'btn-reddit-blue'} py-0 px-2 fw-bold ms-1" style="font-size: 11px;" data-author-id="${post.author.id}">
+        <button class="follow-tag-btn ${isFollowing ? 'is-following' : ''}" data-author-id="${post.author.id}">
           ${isFollowing ? 'Following' : 'Follow'}
         </button>
       `;
@@ -332,8 +338,8 @@ function renderPosts(posts) {
     let mediaHtml = '';
     if (post.image_url) {
       mediaHtml = `
-        <div class="post-image-container my-1">
-          <img class="post-image" src="${resolveUrl(escapeHtml(post.image_url))}" alt="Post Media">
+        <div class="post-media-frame">
+          <img src="${resolveUrl(escapeHtml(post.image_url))}" alt="Post Media">
         </div>
       `;
     }
@@ -341,7 +347,7 @@ function renderPosts(posts) {
     let deleteBtnHtml = '';
     if (isAuthor) {
       deleteBtnHtml = `
-        <button class="action-btn delete-btn" data-delete-post="${post.id}">
+        <button class="post-action-button delete-action" data-delete-post="${post.id}">
           <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/><path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/></svg>
           Delete
         </button>
@@ -350,54 +356,58 @@ function renderPosts(posts) {
 
     card.innerHTML = `
       <div class="vote-rail">
-        <button class="vote-btn ${isUpvoted ? 'upvoted' : ''}" data-vote="1" title="Upvote">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 4l-8 8h5v8h6v-8h5z"/></svg>
+        <button class="vote-button ${isUpvoted ? 'upvote-active' : ''}" data-vote="1" title="Upvote">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 4l-8 8h5v8h6v-8h5z"/></svg>
         </button>
-        <span class="vote-count ${isUpvoted ? 'upvoted' : isDownvoted ? 'downvoted' : ''}">${post.score}</span>
-        <button class="vote-btn ${isDownvoted ? 'downvoted' : ''}" data-vote="-1" title="Downvote">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 20l8-8h-5V4H9v8H4z"/></svg>
+        <span class="vote-tally ${isUpvoted ? 'upvote-active' : isDownvoted ? 'downvote-active' : ''}">${post.score}</span>
+        <button class="vote-button ${isDownvoted ? 'downvote-active' : ''}" data-vote="-1" title="Downvote">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 20l8-8h-5V4H9v8H4z"/></svg>
         </button>
       </div>
-      <div class="post-main">
-        <div class="post-meta">
-          <span class="fw-bold text-dark">r/INCREDIBLE_x_TECH</span>
+      <div class="post-content-container">
+        <div class="post-top-meta">
+          <span class="community-name-link">r/INCREDIBLE_x_TECH</span>
           <span>•</span>
           <span>Posted by</span>
-          <span class="meta-author" data-username="${escapeHtml(post.author.username)}">u/${escapeHtml(post.author.username)}</span>
+          <span class="author-link" data-username="${escapeHtml(post.author.username)}">u/${escapeHtml(post.author.username)}</span>
           <span>${timeAgo(post.created_at)}</span>
           ${followBtnHtml}
         </div>
-        <h2 class="post-title">${escapeHtml(post.title)}</h2>
-        <div class="post-text">${escapeHtml(post.content)}</div>
+        <h2 class="post-headline">${escapeHtml(post.title)}</h2>
+        <div class="post-body-text">${escapeHtml(post.content)}</div>
         ${mediaHtml}
-        <div class="post-actions">
-          <button class="action-btn toggle-comments-btn" data-post-id="${post.id}">
-            <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M2.678 11.894a1 1 0 0 1 .287.801 10.97 10.97 0 0 1-.398 2c1.395-.323 2.247-.697 2.634-.893a1 1 0 0 1 .71-.074A8.06 8.06 0 0 0 8 14c3.996 0 7-2.807 7-6 0-3.192-3.004-6-7-6S1 4.808 1 8c0 1.468.617 2.83 1.678 3.894zm-.493 3.905a21.682 21.682 0 0 1-.713.129c-.2.032-.352-.176-.273-.362a9.68 9.68 0 0 0 .244-.637l.003-.01c.248-.72.45-1.548.524-2.319C.743 11.37 0 9.76 0 8c0-3.866 3.582-7 8-7s8 3.134 8 7-3.582 7-8 7a9.06 9.06 0 0 1-2.347-.306c-.52.263-1.639.742-3.468 1.105z"/></svg>
+        <div class="post-bottom-actions">
+          <button class="post-action-button toggle-comments-btn" data-post-id="${post.id}">
+            <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor"><path d="M10 2C5.58 2 2 5.13 2 9c0 1.94.88 3.7 2.33 4.98L3.5 18l4.4-1.47C8.59 16.8 9.28 17 10 17c4.42 0 8-3.13 8-7s-3.58-7-8-7z"/></svg>
             <span class="comments-count-text">${post.comments_count} Comments</span>
           </button>
-          <button class="action-btn share-post-btn" data-post-id="${post.id}">
-            <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M13.5 1a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zM11 2.5a2.5 2.5 0 1 1 .603 1.628l-6.718 3.12a2.499 2.499 0 0 1 0 1.504l6.718 3.12a2.5 2.5 0 1 1-.488.876l-6.718-3.12a2.5 2.5 0 1 1 0-3.256l6.718-3.12A2.5 2.5 0 0 1 11 2.5zm-8.5 4a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zm11 5.5a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3z"/></svg>
+          <button class="post-action-button share-post-btn" data-post-id="${post.id}">
+            <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor"><path d="M15 10l-6-6v3.5C4 8 2 12 2 16c1.5-2 3.5-3 7-3v3.5l6-6.5z"/></svg>
             Share
+          </button>
+          <button class="post-action-button save-post-btn" data-post-id="${post.id}">
+            <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor"><path d="M5 2h10a1 1 0 0 1 1 1v15l-6-3.5L4 18V3a1 1 0 0 1 1-1z"/></svg>
+            Save
           </button>
           ${deleteBtnHtml}
         </div>
-        <div class="comments-drawer" style="display: none;" id="comments-drawer-${post.id}"></div>
+        <div class="comments-thread-box" style="display: none;" id="comments-drawer-${post.id}"></div>
       </div>
     `;
 
-    const upBtn = card.querySelector('.vote-btn[data-vote="1"]');
-    const downBtn = card.querySelector('.vote-btn[data-vote="-1"]');
-    const voteCountEl = card.querySelector('.vote-count');
+    const upBtn = card.querySelector('.vote-button[data-vote="1"]');
+    const downBtn = card.querySelector('.vote-button[data-vote="-1"]');
+    const voteCountEl = card.querySelector('.vote-tally');
 
     upBtn.addEventListener('click', () => handleVote(post.id, 1, upBtn, downBtn, voteCountEl));
     downBtn.addEventListener('click', () => handleVote(post.id, -1, upBtn, downBtn, voteCountEl));
 
-    const authorLink = card.querySelector('.meta-author');
+    const authorLink = card.querySelector('.author-link');
     if (authorLink) {
       authorLink.addEventListener('click', () => openUserProfile(post.author.username));
     }
 
-    const followBtn = card.querySelector('[data-author-id]');
+    const followBtn = card.querySelector('.follow-tag-btn');
     if (followBtn) {
       followBtn.addEventListener('click', () => handleInlineFollow(post.author.id, followBtn));
     }
@@ -415,6 +425,11 @@ function renderPosts(posts) {
       }).catch(() => {
         showToast('Link copied');
       });
+    });
+
+    const saveBtn = card.querySelector('.save-post-btn');
+    saveBtn.addEventListener('click', () => {
+      showToast('Post saved to your bookmarks');
     });
 
     const toggleCommentsBtn = card.querySelector('.toggle-comments-btn');
@@ -450,16 +465,16 @@ async function handleVote(postId, targetVote, upBtn, downBtn, countEl) {
     if (res.ok) {
       const data = await res.json();
       countEl.textContent = data.score;
-      upBtn.classList.remove('upvoted');
-      downBtn.classList.remove('downvoted');
-      countEl.classList.remove('upvoted', 'downvoted');
+      upBtn.classList.remove('upvote-active');
+      downBtn.classList.remove('downvote-active');
+      countEl.classList.remove('upvote-active', 'downvote-active');
 
       if (data.user_vote === 1) {
-        upBtn.classList.add('upvoted');
-        countEl.classList.add('upvoted');
+        upBtn.classList.add('upvote-active');
+        countEl.classList.add('upvote-active');
       } else if (data.user_vote === -1) {
-        downBtn.classList.add('downvoted');
-        countEl.classList.add('downvoted');
+        downBtn.classList.add('downvote-active');
+        countEl.classList.add('downvote-active');
       }
     }
   } catch (err) {
@@ -481,10 +496,10 @@ async function handleInlineFollow(authorId, buttonEl) {
       const data = await res.json();
       if (data.is_following) {
         buttonEl.textContent = 'Following';
-        buttonEl.className = 'btn btn-sm btn-light border py-0 px-2 fw-bold ms-1';
+        buttonEl.classList.add('is-following');
       } else {
         buttonEl.textContent = 'Follow';
-        buttonEl.className = 'btn btn-sm btn-reddit-blue py-0 px-2 fw-bold ms-1';
+        buttonEl.classList.remove('is-following');
       }
       fetchMe();
     }
@@ -529,9 +544,12 @@ function renderCommentsSection(postId, comments, container, countTextEl) {
 
   if (currentUser) {
     inputArea.innerHTML = `
-      <textarea class="form-control" id="comment-textarea-${postId}" rows="2" placeholder="What are your thoughts on this architecture?"></textarea>
-      <div class="d-flex justify-content-end">
-        <button class="btn btn-reddit-blue btn-sm" id="submit-comment-${postId}">Comment</button>
+      <div style="font-size: 12px; color: var(--reddit-meta);">Comment as <strong class="text-dark">u/${escapeHtml(currentUser.username)}</strong></div>
+      <div class="comment-composer">
+        <textarea id="comment-textarea-${postId}" placeholder="What are your thoughts on this architecture?"></textarea>
+        <div class="d-flex justify-content-end">
+          <button class="btn-reddit-solid" id="submit-comment-${postId}" style="font-size: 12px; padding: 4px 14px;">Comment</button>
+        </div>
       </div>
     `;
     container.appendChild(inputArea);
@@ -563,7 +581,7 @@ function renderCommentsSection(postId, comments, container, countTextEl) {
     });
   } else {
     inputArea.innerHTML = `
-      <div class="card p-2 text-center text-secondary" style="font-size: 13px;">
+      <div class="card p-2 text-center text-secondary" style="font-size: 13px; border: 1px solid var(--reddit-border);">
         <a href="#" class="comment-login-trigger text-decoration-none fw-bold">Log in</a> or <a href="#" class="comment-signup-trigger text-decoration-none fw-bold">sign up</a> to participate in the discussion.
       </div>
     `;
@@ -586,7 +604,7 @@ function renderCommentsSection(postId, comments, container, countTextEl) {
   } else {
     comments.forEach(comment => {
       const item = document.createElement('div');
-      item.className = 'comment-item';
+      item.className = 'comment-entry-row';
 
       let deleteBtnHtml = '';
       if (comment.can_delete) {
@@ -594,18 +612,18 @@ function renderCommentsSection(postId, comments, container, countTextEl) {
       }
 
       item.innerHTML = `
-        <img class="comment-avatar" src="${resolveUrl(escapeHtml(comment.author.avatar_url || '/media/avatar1.jpg'))}" alt="Avatar">
-        <div class="flex-grow-1 d-flex flex-column gap-1">
-          <div class="d-flex align-items-center gap-2">
-            <span class="comment-author" data-username="${escapeHtml(comment.author.username)}">u/${escapeHtml(comment.author.username)}</span>
-            <span class="comment-time">${timeAgo(comment.created_at)}</span>
+        <img class="comment-user-avatar" src="${resolveUrl(escapeHtml(comment.author.avatar_url || '/media/avatar1.jpg'))}" alt="Avatar">
+        <div class="comment-main-body">
+          <div class="comment-user-header">
+            <span class="comment-username" data-username="${escapeHtml(comment.author.username)}">u/${escapeHtml(comment.author.username)}</span>
+            <span class="comment-timestamp">${timeAgo(comment.created_at)}</span>
             ${deleteBtnHtml}
           </div>
-          <div class="comment-content">${escapeHtml(comment.content)}</div>
+          <div class="comment-text-content">${escapeHtml(comment.content)}</div>
         </div>
       `;
 
-      item.querySelector('.comment-author').addEventListener('click', () => {
+      item.querySelector('.comment-username').addEventListener('click', () => {
         openUserProfile(comment.author.username);
       });
 
@@ -870,10 +888,10 @@ async function refreshProfileView() {
       profileFollowToggleBtn.classList.remove('d-none');
       if (user.is_following) {
         profileFollowToggleBtn.textContent = 'Following';
-        profileFollowToggleBtn.className = 'btn btn-light btn-sm border';
+        profileFollowToggleBtn.className = 'btn-reddit-bordered py-1 px-3';
       } else {
         profileFollowToggleBtn.textContent = 'Follow';
-        profileFollowToggleBtn.className = 'btn btn-reddit-blue btn-sm';
+        profileFollowToggleBtn.className = 'btn-reddit-solid py-1 px-3';
       }
       profileFollowToggleBtn.onclick = async () => {
         if (!currentUser) {
@@ -982,19 +1000,19 @@ async function loadProfileTabContent(targetUser) {
       profileTabContent.innerHTML = '';
       posts.forEach(post => {
         const item = document.createElement('div');
-        item.className = 'post-card mb-2';
+        item.className = 'reddit-post-card mb-2';
         item.innerHTML = `
           <div class="vote-rail">
-            <span class="vote-count">${post.score}</span>
+            <span class="vote-tally">${post.score}</span>
           </div>
-          <div class="post-main">
-            <div class="post-meta">
+          <div class="post-content-container">
+            <div class="post-top-meta">
               <span>Posted ${timeAgo(post.created_at)}</span>
               <span>•</span>
               <span>${post.comments_count} comments</span>
             </div>
-            <h5 class="post-title" style="font-size: 15px;">${escapeHtml(post.title)}</h5>
-            <div class="post-text" style="font-size: 13px;">${escapeHtml(post.content)}</div>
+            <h5 class="post-headline" style="font-size: 15px;">${escapeHtml(post.title)}</h5>
+            <div class="post-body-text" style="font-size: 13px;">${escapeHtml(post.content)}</div>
           </div>
         `;
         profileTabContent.appendChild(item);
@@ -1035,7 +1053,7 @@ function renderUserList(users, emptyMessage) {
     const isOwn = currentUser && currentUser.id === u.id;
     if (currentUser && !isOwn) {
       followBtnHtml = `
-        <button class="btn btn-sm ${u.is_following ? 'btn-light border' : 'btn-reddit-blue'} py-0 px-2 fw-bold follow-action-btn" style="font-size: 11px;" data-uid="${u.id}">
+        <button class="btn btn-sm ${u.is_following ? 'btn-light border' : 'btn-reddit-solid'} py-1 px-3 fw-bold follow-action-btn" style="font-size: 11px; border-radius: 20px;" data-uid="${u.id}">
           ${u.is_following ? 'Following' : 'Follow'}
         </button>
       `;
@@ -1088,24 +1106,67 @@ sidebarViewProfileBtn.addEventListener('click', () => {
   if (currentUser) openUserProfile(currentUser.username);
 });
 
+headerJoinBtn.addEventListener('click', () => {
+  if (headerJoinBtn.classList.contains('joined')) {
+    headerJoinBtn.classList.remove('joined');
+    headerJoinBtn.textContent = 'Join';
+    showToast('Left r/INCREDIBLE_x_TECH');
+  } else {
+    headerJoinBtn.classList.add('joined');
+    headerJoinBtn.textContent = 'Joined';
+    showToast('Joined r/INCREDIBLE_x_TECH');
+  }
+});
+
+subtabPosts.addEventListener('click', (e) => {
+  e.preventDefault();
+  subtabPosts.classList.add('active');
+  subtabRules.classList.remove('active');
+  subtabWiki.classList.remove('active');
+  subtabFaq.classList.remove('active');
+  currentSort = 'hot';
+  updateSortButtons();
+  loadPosts();
+});
+
+subtabRules.addEventListener('click', (e) => {
+  e.preventDefault();
+  subtabPosts.classList.remove('active');
+  subtabRules.classList.add('active');
+  subtabWiki.classList.remove('active');
+  subtabFaq.classList.remove('active');
+  showToast('Viewing community rules');
+});
+
+subtabWiki.addEventListener('click', (e) => {
+  e.preventDefault();
+  showToast('Wiki documentation: High-Performance Systems & Modern Architecture');
+});
+
+subtabFaq.addEventListener('click', (e) => {
+  e.preventDefault();
+  showToast('Frequently Asked Questions: Community moderation and technical guidelines');
+});
+
+document.querySelectorAll('[data-username]').forEach(el => {
+  el.addEventListener('click', (e) => {
+    e.preventDefault();
+    openUserProfile(el.getAttribute('data-username'));
+  });
+});
+
 function updateSortButtons() {
-  sortHotBtn.classList.remove('active', 'btn-primary');
-  sortNewBtn.classList.remove('active', 'btn-primary');
-  sortTopBtn.classList.remove('active', 'btn-primary');
-  sortHotBtn.classList.add('btn-light');
-  sortNewBtn.classList.add('btn-light');
-  sortTopBtn.classList.add('btn-light');
+  sortHotBtn.classList.remove('active');
+  sortNewBtn.classList.remove('active');
+  sortTopBtn.classList.remove('active');
   if (currentSort === 'hot') {
-    sortHotBtn.classList.add('active', 'btn-primary');
-    sortHotBtn.classList.remove('btn-light');
+    sortHotBtn.classList.add('active');
   }
   if (currentSort === 'new') {
-    sortNewBtn.classList.add('active', 'btn-primary');
-    sortNewBtn.classList.remove('btn-light');
+    sortNewBtn.classList.add('active');
   }
   if (currentSort === 'top') {
-    sortTopBtn.classList.add('active', 'btn-primary');
-    sortTopBtn.classList.remove('btn-light');
+    sortTopBtn.classList.add('active');
   }
 }
 
