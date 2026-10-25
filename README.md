@@ -12,14 +12,17 @@ CodeAlpha_SocialMediaPlatform/
 │   ├── database.js          # SQLite relational schema, seed data, and query engine
 │   ├── server.js            # Express REST API, CORS middleware, file uploads
 │   ├── package.json         # Backend package configuration
+│   ├── package-lock.json
 │   ├── social_platform.db   # Persistent SQLite database
 │   ├── media/               # Copyright-free CC0 technology images and avatars
 │   └── uploads/             # User-uploaded post attachments
 │
 ├── frontend/
-│   ├── index.html           # Reddit UI layout (navigation, feed, sidebar, modals)
-│   ├── style.css            # Authentic Reddit styling rules, zero drop-shadows
+│   ├── index.html           # Reddit UI layout with Bootstrap 5 integration
+│   ├── style.css            # Reddit custom styling and Bootstrap refinements
 │   ├── app.js               # Client controller, API client, and state management
+│   ├── bootstrap.min.css    # Local Bootstrap 5.3 framework styles
+│   ├── bootstrap.bundle.min.js # Local Bootstrap 5.3 modal and toast bundle
 │   └── media/               # Local copyright-free image assets
 │
 ├── package.json             # Root runner script configuration
@@ -31,7 +34,8 @@ CodeAlpha_SocialMediaPlatform/
 - User Profiles: View profile details, avatars, bios, post history, followers, and following lists, with full profile editing.
 - Posts and Comments: Rich technical posts with text, copyright-free media attachments, and interactive comment threads.
 - Like and Follow System: Reddit-style upvote/downvote mechanics with live scores, and user follow/unfollow capability with dynamic follower tallies.
-- Reddit UI and Structure: Standard Reddit layout including sticky navigation, Hot/New/Top sorting, subreddit rules sidebar, community statistics, and legal agreements.
+- Reddit UI and Structure: Standard Reddit layout with Bootstrap 5 responsive grid, sticky navbar, Hot/New/Top sorting, subreddit rules sidebar, community statistics, and legal agreements.
+- UI Framework: Bootstrap 5.3 component library powering modals, responsive grid, form controls, and badges while preserving authentic Reddit aesthetics.
 - Copyright-Free Media: Bundled with pre-downloaded CC0 public domain technology photographs, plus support for custom image uploads.
 
 ## Getting Started

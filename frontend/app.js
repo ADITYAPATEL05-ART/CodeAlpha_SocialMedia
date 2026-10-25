@@ -41,8 +41,7 @@ const sidebarViewProfileBtn = document.getElementById('sidebarViewProfileBtn');
 const statMembers = document.getElementById('statMembers');
 const statOnline = document.getElementById('statOnline');
 
-const authModal = document.getElementById('authModal');
-const closeAuthModal = document.getElementById('closeAuthModal');
+const authModalEl = document.getElementById('authModal');
 const tabLoginBtn = document.getElementById('tabLoginBtn');
 const tabSignupBtn = document.getElementById('tabSignupBtn');
 const authModalTitle = document.getElementById('authModalTitle');
@@ -56,8 +55,7 @@ const authBio = document.getElementById('authBio');
 const authSubmitBtn = document.getElementById('authSubmitBtn');
 const authError = document.getElementById('authError');
 
-const createPostModal = document.getElementById('createPostModal');
-const closeCreateModal = document.getElementById('closeCreateModal');
+const createPostModalEl = document.getElementById('createPostModal');
 const createPostForm = document.getElementById('createPostForm');
 const postTitleInput = document.getElementById('postTitleInput');
 const postContentInput = document.getElementById('postContentInput');
@@ -65,11 +63,10 @@ const freeMediaGrid = document.getElementById('freeMediaGrid');
 const postImageFile = document.getElementById('postImageFile');
 const clearImageBtn = document.getElementById('clearImageBtn');
 const imageSelectedPreview = document.getElementById('imageSelectedPreview');
-const cancelCreatePostBtn = document.getElementById('cancelCreatePostBtn');
 const postError = document.getElementById('postError');
 
-const profileModal = document.getElementById('profileModal');
-const closeProfileModal = document.getElementById('closeProfileModal');
+const profileModalEl = document.getElementById('profileModal');
+const profileModalTitle = document.getElementById('profileModalTitle');
 const profileViewAvatar = document.getElementById('profileViewAvatar');
 const profileViewDisplayName = document.getElementById('profileViewDisplayName');
 const profileViewUsername = document.getElementById('profileViewUsername');
@@ -91,18 +88,32 @@ const pTabFollowers = document.getElementById('pTabFollowers');
 const pTabFollowing = document.getElementById('pTabFollowing');
 const profileTabContent = document.getElementById('profileTabContent');
 
-const tosModal = document.getElementById('tosModal');
-const closeTosModal = document.getElementById('closeTosModal');
-const confirmTosBtn = document.getElementById('confirmTosBtn');
-const privacyModal = document.getElementById('privacyModal');
-const closePrivacyModal = document.getElementById('closePrivacyModal');
-const confirmPrivacyBtn = document.getElementById('confirmPrivacyBtn');
+const tosModalEl = document.getElementById('tosModal');
+const privacyModalEl = document.getElementById('privacyModal');
 const linkUserAgreement = document.getElementById('linkUserAgreement');
 const linkPrivacyPolicy = document.getElementById('linkPrivacyPolicy');
 const linkContentPolicy = document.getElementById('linkContentPolicy');
 
-const appToast = document.getElementById('appToast');
-let toastTimer = null;
+const appToastEl = document.getElementById('appToast');
+const toastMessage = document.getElementById('toastMessage');
+
+let bsAuthModal = null;
+let bsCreatePostModal = null;
+let bsProfileModal = null;
+let bsTosModal = null;
+let bsPrivacyModal = null;
+let bsToast = null;
+
+function initBootstrapComponents() {
+  if (typeof bootstrap !== 'undefined') {
+    bsAuthModal = new bootstrap.Modal(authModalEl);
+    bsCreatePostModal = new bootstrap.Modal(createPostModalEl);
+    bsProfileModal = new bootstrap.Modal(profileModalEl);
+    bsTosModal = new bootstrap.Modal(tosModalEl);
+    bsPrivacyModal = new bootstrap.Modal(privacyModalEl);
+    bsToast = new bootstrap.Toast(appToastEl);
+  }
+}
 
 function resolveUrl(url) {
   if (!url) return '';
@@ -111,12 +122,10 @@ function resolveUrl(url) {
 }
 
 function showToast(message) {
-  if (toastTimer) clearTimeout(toastTimer);
-  appToast.textContent = message;
-  appToast.classList.remove('hidden');
-  toastTimer = setTimeout(() => {
-    appToast.classList.add('hidden');
-  }, 2800);
+  toastMessage.textContent = message;
+  if (bsToast) {
+    bsToast.show();
+  }
 }
 
 function getAuthHeader() {
@@ -172,12 +181,13 @@ async function fetchMe() {
 
 function updateAuthUI() {
   if (currentUser) {
-    loggedOutButtons.style.display = 'none';
-    loggedInArea.style.display = 'flex';
+    loggedOutButtons.classList.add('d-none');
+    loggedInArea.classList.remove('d-none');
+    loggedInArea.classList.add('d-flex');
     navUserName.textContent = currentUser.username;
     navUserAvatar.src = resolveUrl(currentUser.avatar_url || '/media/avatar1.jpg');
     triggerAvatar.src = resolveUrl(currentUser.avatar_url || '/media/avatar1.jpg');
-    sidebarUserBox.style.display = 'block';
+    sidebarUserBox.classList.remove('d-none');
     sidebarUserAvatar.src = resolveUrl(currentUser.avatar_url || '/media/avatar1.jpg');
     sidebarUserDisplayName.textContent = currentUser.display_name;
     sidebarUserHandle.textContent = `u/${currentUser.username}`;
@@ -185,9 +195,10 @@ function updateAuthUI() {
     sidebarFollowersCount.textContent = currentUser.followers_count || 0;
     sidebarFollowingCount.textContent = currentUser.following_count || 0;
   } else {
-    loggedOutButtons.style.display = 'flex';
-    loggedInArea.style.display = 'none';
-    sidebarUserBox.style.display = 'none';
+    loggedOutButtons.classList.remove('d-none');
+    loggedInArea.classList.add('d-none');
+    loggedInArea.classList.remove('d-flex');
+    sidebarUserBox.classList.add('d-none');
     triggerAvatar.src = resolveUrl('/media/avatar1.jpg');
   }
 }
@@ -276,23 +287,23 @@ function renderFreeMediaGrid() {
 }
 
 async function loadPosts() {
-  postsFeed.innerHTML = '<div class="empty-state">Loading posts...</div>';
+  postsFeed.innerHTML = '<div class="card p-4 text-center text-secondary">Loading posts...</div>';
   try {
     const url = `${API_BASE}/api/posts?sort=${currentSort}&search=${encodeURIComponent(currentSearch)}`;
     const res = await fetch(url, { headers: getAuthHeader() });
     const data = await res.json();
     renderPosts(data.posts || []);
   } catch (err) {
-    postsFeed.innerHTML = '<div class="empty-state">Failed to load posts. Please try again.</div>';
+    postsFeed.innerHTML = '<div class="card p-4 text-center text-danger">Failed to load posts. Please try again.</div>';
   }
 }
 
 function renderPosts(posts) {
   if (posts.length === 0) {
     postsFeed.innerHTML = `
-      <div class="empty-state">
-        <h3>No Technical Discussions Found</h3>
-        <p>There are no posts matching your filter. Be the first to share an engineering architecture post.</p>
+      <div class="card p-4 text-center text-secondary">
+        <h5 class="text-dark fw-bold">No Technical Discussions Found</h5>
+        <p class="mb-0">There are no posts matching your filter. Be the first to share an engineering architecture post.</p>
       </div>
     `;
     return;
@@ -312,7 +323,7 @@ function renderPosts(posts) {
     let followBtnHtml = '';
     if (currentUser && !isAuthor) {
       followBtnHtml = `
-        <button class="btn-follow ${isFollowing ? 'following' : 'btn-primary'}" data-author-id="${post.author.id}">
+        <button class="btn btn-sm ${isFollowing ? 'btn-light border' : 'btn-reddit-blue'} py-0 px-2 fw-bold ms-1" style="font-size: 11px;" data-author-id="${post.author.id}">
           ${isFollowing ? 'Following' : 'Follow'}
         </button>
       `;
@@ -321,7 +332,7 @@ function renderPosts(posts) {
     let mediaHtml = '';
     if (post.image_url) {
       mediaHtml = `
-        <div class="post-image-container">
+        <div class="post-image-container my-1">
           <img class="post-image" src="${resolveUrl(escapeHtml(post.image_url))}" alt="Post Media">
         </div>
       `;
@@ -331,7 +342,7 @@ function renderPosts(posts) {
     if (isAuthor) {
       deleteBtnHtml = `
         <button class="action-btn delete-btn" data-delete-post="${post.id}">
-          <svg viewBox="0 0 16 16"><path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/><path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/></svg>
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/><path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/></svg>
           Delete
         </button>
       `;
@@ -340,16 +351,16 @@ function renderPosts(posts) {
     card.innerHTML = `
       <div class="vote-rail">
         <button class="vote-btn ${isUpvoted ? 'upvoted' : ''}" data-vote="1" title="Upvote">
-          <svg viewBox="0 0 24 24"><path d="M12 4l-8 8h5v8h6v-8h5z"/></svg>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 4l-8 8h5v8h6v-8h5z"/></svg>
         </button>
         <span class="vote-count ${isUpvoted ? 'upvoted' : isDownvoted ? 'downvoted' : ''}">${post.score}</span>
         <button class="vote-btn ${isDownvoted ? 'downvoted' : ''}" data-vote="-1" title="Downvote">
-          <svg viewBox="0 0 24 24"><path d="M12 20l8-8h-5V4H9v8H4z"/></svg>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 20l8-8h-5V4H9v8H4z"/></svg>
         </button>
       </div>
       <div class="post-main">
         <div class="post-meta">
-          <span class="meta-community">r/INCREDIBLE_x_TECH</span>
+          <span class="fw-bold text-dark">r/INCREDIBLE_x_TECH</span>
           <span>•</span>
           <span>Posted by</span>
           <span class="meta-author" data-username="${escapeHtml(post.author.username)}">u/${escapeHtml(post.author.username)}</span>
@@ -361,11 +372,11 @@ function renderPosts(posts) {
         ${mediaHtml}
         <div class="post-actions">
           <button class="action-btn toggle-comments-btn" data-post-id="${post.id}">
-            <svg viewBox="0 0 16 16"><path d="M2.678 11.894a1 1 0 0 1 .287.801 10.97 10.97 0 0 1-.398 2c1.395-.323 2.247-.697 2.634-.893a1 1 0 0 1 .71-.074A8.06 8.06 0 0 0 8 14c3.996 0 7-2.807 7-6 0-3.192-3.004-6-7-6S1 4.808 1 8c0 1.468.617 2.83 1.678 3.894zm-.493 3.905a21.682 21.682 0 0 1-.713.129c-.2.032-.352-.176-.273-.362a9.68 9.68 0 0 0 .244-.637l.003-.01c.248-.72.45-1.548.524-2.319C.743 11.37 0 9.76 0 8c0-3.866 3.582-7 8-7s8 3.134 8 7-3.582 7-8 7a9.06 9.06 0 0 1-2.347-.306c-.52.263-1.639.742-3.468 1.105z"/></svg>
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M2.678 11.894a1 1 0 0 1 .287.801 10.97 10.97 0 0 1-.398 2c1.395-.323 2.247-.697 2.634-.893a1 1 0 0 1 .71-.074A8.06 8.06 0 0 0 8 14c3.996 0 7-2.807 7-6 0-3.192-3.004-6-7-6S1 4.808 1 8c0 1.468.617 2.83 1.678 3.894zm-.493 3.905a21.682 21.682 0 0 1-.713.129c-.2.032-.352-.176-.273-.362a9.68 9.68 0 0 0 .244-.637l.003-.01c.248-.72.45-1.548.524-2.319C.743 11.37 0 9.76 0 8c0-3.866 3.582-7 8-7s8 3.134 8 7-3.582 7-8 7a9.06 9.06 0 0 1-2.347-.306c-.52.263-1.639.742-3.468 1.105z"/></svg>
             <span class="comments-count-text">${post.comments_count} Comments</span>
           </button>
           <button class="action-btn share-post-btn" data-post-id="${post.id}">
-            <svg viewBox="0 0 16 16"><path d="M13.5 1a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zM11 2.5a2.5 2.5 0 1 1 .603 1.628l-6.718 3.12a2.499 2.499 0 0 1 0 1.504l6.718 3.12a2.5 2.5 0 1 1-.488.876l-6.718-3.12a2.5 2.5 0 1 1 0-3.256l6.718-3.12A2.5 2.5 0 0 1 11 2.5zm-8.5 4a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zzm11 5.5a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3z"/></svg>
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M13.5 1a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zM11 2.5a2.5 2.5 0 1 1 .603 1.628l-6.718 3.12a2.499 2.499 0 0 1 0 1.504l6.718 3.12a2.5 2.5 0 1 1-.488.876l-6.718-3.12a2.5 2.5 0 1 1 0-3.256l6.718-3.12A2.5 2.5 0 0 1 11 2.5zm-8.5 4a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zm11 5.5a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3z"/></svg>
             Share
           </button>
           ${deleteBtnHtml}
@@ -386,7 +397,7 @@ function renderPosts(posts) {
       authorLink.addEventListener('click', () => openUserProfile(post.author.username));
     }
 
-    const followBtn = card.querySelector('.btn-follow');
+    const followBtn = card.querySelector('[data-author-id]');
     if (followBtn) {
       followBtn.addEventListener('click', () => handleInlineFollow(post.author.id, followBtn));
     }
@@ -470,10 +481,10 @@ async function handleInlineFollow(authorId, buttonEl) {
       const data = await res.json();
       if (data.is_following) {
         buttonEl.textContent = 'Following';
-        buttonEl.className = 'btn-follow following';
+        buttonEl.className = 'btn btn-sm btn-light border py-0 px-2 fw-bold ms-1';
       } else {
         buttonEl.textContent = 'Follow';
-        buttonEl.className = 'btn-follow btn-primary';
+        buttonEl.className = 'btn btn-sm btn-reddit-blue py-0 px-2 fw-bold ms-1';
       }
       fetchMe();
     }
@@ -500,13 +511,13 @@ async function handleDeletePost(postId) {
 }
 
 async function loadCommentsForPost(postId, container, countTextEl) {
-  container.innerHTML = '<div style="font-size: 13px; color: var(--text-muted);">Loading comments...</div>';
+  container.innerHTML = '<div class="text-secondary" style="font-size: 13px;">Loading comments...</div>';
   try {
     const res = await fetch(`${API_BASE}/api/posts/${postId}/comments`, { headers: getAuthHeader() });
     const data = await res.json();
     renderCommentsSection(postId, data.comments || [], container, countTextEl);
   } catch (err) {
-    container.innerHTML = '<div style="font-size: 13px; color: var(--danger);">Failed to load comments.</div>';
+    container.innerHTML = '<div class="text-danger" style="font-size: 13px;">Failed to load comments.</div>';
   }
 }
 
@@ -514,13 +525,13 @@ function renderCommentsSection(postId, comments, container, countTextEl) {
   container.innerHTML = '';
 
   const inputArea = document.createElement('div');
-  inputArea.className = 'comment-input-area';
+  inputArea.className = 'd-flex flex-column gap-2';
 
   if (currentUser) {
     inputArea.innerHTML = `
-      <textarea id="comment-textarea-${postId}" placeholder="What are your thoughts on this architecture?"></textarea>
-      <div class="comment-actions-row">
-        <button class="btn-primary" id="submit-comment-${postId}">Comment</button>
+      <textarea class="form-control" id="comment-textarea-${postId}" rows="2" placeholder="What are your thoughts on this architecture?"></textarea>
+      <div class="d-flex justify-content-end">
+        <button class="btn btn-reddit-blue btn-sm" id="submit-comment-${postId}">Comment</button>
       </div>
     `;
     container.appendChild(inputArea);
@@ -552,8 +563,8 @@ function renderCommentsSection(postId, comments, container, countTextEl) {
     });
   } else {
     inputArea.innerHTML = `
-      <div style="font-size: 13px; padding: 8px; background: #FFF; border: 1px solid var(--border-color); border-radius: var(--radius); text-align: center;">
-        <a href="#" class="comment-login-trigger">Log in</a> or <a href="#" class="comment-signup-trigger">sign up</a> to participate in the discussion.
+      <div class="card p-2 text-center text-secondary" style="font-size: 13px;">
+        <a href="#" class="comment-login-trigger text-decoration-none fw-bold">Log in</a> or <a href="#" class="comment-signup-trigger text-decoration-none fw-bold">sign up</a> to participate in the discussion.
       </div>
     `;
     container.appendChild(inputArea);
@@ -568,10 +579,10 @@ function renderCommentsSection(postId, comments, container, countTextEl) {
   }
 
   const listEl = document.createElement('div');
-  listEl.className = 'comments-list';
+  listEl.className = 'd-flex flex-column gap-2 mt-2';
 
   if (comments.length === 0) {
-    listEl.innerHTML = '<div style="font-size: 13px; color: var(--text-muted); padding: 8px 0;">No comments yet. Be the first to share an engineering perspective.</div>';
+    listEl.innerHTML = '<div class="text-secondary py-2" style="font-size: 13px;">No comments yet. Be the first to share an engineering perspective.</div>';
   } else {
     comments.forEach(comment => {
       const item = document.createElement('div');
@@ -579,20 +590,18 @@ function renderCommentsSection(postId, comments, container, countTextEl) {
 
       let deleteBtnHtml = '';
       if (comment.can_delete) {
-        deleteBtnHtml = `<button class="comment-delete-btn" data-delete-comment="${comment.id}">Delete</button>`;
+        deleteBtnHtml = `<button class="btn btn-link text-danger p-0 ms-auto text-decoration-none" style="font-size: 11px;" data-delete-comment="${comment.id}">Delete</button>`;
       }
 
       item.innerHTML = `
         <img class="comment-avatar" src="${resolveUrl(escapeHtml(comment.author.avatar_url || '/media/avatar1.jpg'))}" alt="Avatar">
-        <div class="comment-body-wrap">
-          <div class="comment-header">
+        <div class="flex-grow-1 d-flex flex-column gap-1">
+          <div class="d-flex align-items-center gap-2">
             <span class="comment-author" data-username="${escapeHtml(comment.author.username)}">u/${escapeHtml(comment.author.username)}</span>
             <span class="comment-time">${timeAgo(comment.created_at)}</span>
-          </div>
-          <div class="comment-content">${escapeHtml(comment.content)}</div>
-          <div class="comment-footer">
             ${deleteBtnHtml}
           </div>
+          <div class="comment-content">${escapeHtml(comment.content)}</div>
         </div>
       `;
 
@@ -629,30 +638,33 @@ function renderCommentsSection(postId, comments, container, countTextEl) {
 }
 
 function showAuthModal(mode) {
-  authError.style.display = 'none';
+  authError.classList.add('d-none');
   authError.textContent = '';
   authForm.reset();
   if (mode === 'signup') {
     authModalTitle.textContent = 'Sign Up';
-    tabSignupBtn.classList.add('active');
-    tabLoginBtn.classList.remove('active');
-    displayNameGroup.style.display = 'flex';
-    bioGroup.style.display = 'flex';
+    tabSignupBtn.classList.add('active', 'border-primary');
+    tabLoginBtn.classList.remove('active', 'border-primary');
+    displayNameGroup.classList.remove('d-none');
+    displayNameGroup.classList.add('d-flex');
+    bioGroup.classList.remove('d-none');
+    bioGroup.classList.add('d-flex');
     authSubmitBtn.textContent = 'Sign Up';
   } else {
     authModalTitle.textContent = 'Log In';
-    tabLoginBtn.classList.add('active');
-    tabSignupBtn.classList.remove('active');
-    displayNameGroup.style.display = 'none';
-    bioGroup.style.display = 'none';
+    tabLoginBtn.classList.add('active', 'border-primary');
+    tabSignupBtn.classList.remove('active', 'border-primary');
+    displayNameGroup.classList.add('d-none');
+    displayNameGroup.classList.remove('d-flex');
+    bioGroup.classList.add('d-none');
+    bioGroup.classList.remove('d-flex');
     authSubmitBtn.textContent = 'Log In';
   }
-  authModal.classList.remove('hidden');
+  if (bsAuthModal) bsAuthModal.show();
 }
 
 openLoginBtn.addEventListener('click', () => showAuthModal('login'));
 openSignupBtn.addEventListener('click', () => showAuthModal('signup'));
-closeAuthModal.addEventListener('click', () => authModal.classList.add('hidden'));
 
 tabLoginBtn.addEventListener('click', (e) => {
   e.preventDefault();
@@ -666,7 +678,7 @@ tabSignupBtn.addEventListener('click', (e) => {
 
 authForm.addEventListener('submit', async (e) => {
   e.preventDefault();
-  authError.style.display = 'none';
+  authError.classList.add('d-none');
   const isSignup = tabSignupBtn.classList.contains('active');
   const endpoint = isSignup ? `${API_BASE}/api/auth/register` : `${API_BASE}/api/auth/login`;
 
@@ -689,7 +701,7 @@ authForm.addEventListener('submit', async (e) => {
     const data = await res.json();
     if (res.ok) {
       localStorage.setItem('auth_token', data.token);
-      authModal.classList.add('hidden');
+      if (bsAuthModal) bsAuthModal.hide();
       await fetchMe();
       loadPosts();
       loadDemoUsers();
@@ -697,11 +709,11 @@ authForm.addEventListener('submit', async (e) => {
       showToast(isSignup ? 'Welcome to INCREDIBLE_x_TECH' : 'Logged in successfully');
     } else {
       authError.textContent = data.error || 'Authentication failed';
-      authError.style.display = 'block';
+      authError.classList.remove('d-none');
     }
   } catch (err) {
     authError.textContent = 'Network or server error';
-    authError.style.display = 'block';
+    authError.classList.remove('d-none');
   }
 });
 
@@ -723,18 +735,16 @@ function openCreateModal() {
     return;
   }
   createPostForm.reset();
-  postError.style.display = 'none';
+  postError.classList.add('d-none');
   selectedMediaUrl = '';
   imageSelectedPreview.textContent = '';
   document.querySelectorAll('.media-picker-item').forEach(d => d.classList.remove('selected'));
-  createPostModal.classList.remove('hidden');
+  if (bsCreatePostModal) bsCreatePostModal.show();
 }
 
 feedCreateTrigger.addEventListener('click', openCreateModal);
 navbarCreateBtn.addEventListener('click', openCreateModal);
 sidebarCreateBtn.addEventListener('click', openCreateModal);
-closeCreateModal.addEventListener('click', () => createPostModal.classList.add('hidden'));
-cancelCreatePostBtn.addEventListener('click', () => createPostModal.classList.add('hidden'));
 
 clearImageBtn.addEventListener('click', () => {
   selectedMediaUrl = '';
@@ -753,13 +763,13 @@ postImageFile.addEventListener('change', () => {
 
 createPostForm.addEventListener('submit', async (e) => {
   e.preventDefault();
-  postError.style.display = 'none';
+  postError.classList.add('d-none');
   const title = postTitleInput.value.trim();
   const content = postContentInput.value.trim();
 
   if (!title || !content) {
     postError.textContent = 'Title and body text are required';
-    postError.style.display = 'block';
+    postError.classList.remove('d-none');
     return;
   }
 
@@ -777,13 +787,13 @@ createPostForm.addEventListener('submit', async (e) => {
       const upData = await upRes.json();
       if (!upRes.ok) {
         postError.textContent = upData.error || 'Failed to upload image file';
-        postError.style.display = 'block';
+        postError.classList.remove('d-none');
         return;
       }
       finalImageUrl = upData.url;
     } catch (err) {
       postError.textContent = 'Upload failed';
-      postError.style.display = 'block';
+      postError.classList.remove('d-none');
       return;
     }
   }
@@ -803,7 +813,7 @@ createPostForm.addEventListener('submit', async (e) => {
     });
     const data = await res.json();
     if (res.ok) {
-      createPostModal.classList.add('hidden');
+      if (bsCreatePostModal) bsCreatePostModal.hide();
       currentSort = 'new';
       updateSortButtons();
       loadPosts();
@@ -812,29 +822,29 @@ createPostForm.addEventListener('submit', async (e) => {
       showToast('Discussion published to r/INCREDIBLE_x_TECH');
     } else {
       postError.textContent = data.error || 'Failed to publish post';
-      postError.style.display = 'block';
+      postError.classList.remove('d-none');
     }
   } catch (err) {
     postError.textContent = 'Network error while creating post';
-    postError.style.display = 'block';
+    postError.classList.remove('d-none');
   }
 });
 
 async function openUserProfile(username) {
   currentProfileUsername = username;
   currentProfileTab = 'posts';
-  profileEditSection.style.display = 'none';
-  profileModal.classList.remove('hidden');
+  profileEditSection.classList.add('d-none');
+  if (bsProfileModal) bsProfileModal.show();
   await refreshProfileView();
 }
 
 async function refreshProfileView() {
   if (!currentProfileUsername) return;
-  profileTabContent.innerHTML = '<div style="font-size: 13px; color: var(--text-muted);">Loading profile data...</div>';
+  profileTabContent.innerHTML = '<div class="text-secondary p-3 text-center" style="font-size: 13px;">Loading profile data...</div>';
   try {
     const res = await fetch(`${API_BASE}/api/users/${currentProfileUsername}`, { headers: getAuthHeader() });
     if (!res.ok) {
-      profileTabContent.innerHTML = '<div class="empty-state">User not found</div>';
+      profileTabContent.innerHTML = '<div class="card p-3 text-center text-secondary">User not found</div>';
       return;
     }
     const data = await res.json();
@@ -853,17 +863,17 @@ async function refreshProfileView() {
     const isOwn = currentUser && currentUser.id === user.id;
 
     if (isOwn) {
-      profileFollowToggleBtn.style.display = 'none';
-      profileEditToggleBtn.style.display = 'inline-flex';
+      profileFollowToggleBtn.classList.add('d-none');
+      profileEditToggleBtn.classList.remove('d-none');
     } else {
-      profileEditToggleBtn.style.display = 'none';
-      profileFollowToggleBtn.style.display = 'inline-flex';
+      profileEditToggleBtn.classList.add('d-none');
+      profileFollowToggleBtn.classList.remove('d-none');
       if (user.is_following) {
         profileFollowToggleBtn.textContent = 'Following';
-        profileFollowToggleBtn.className = 'btn-subtle';
+        profileFollowToggleBtn.className = 'btn btn-light btn-sm border';
       } else {
         profileFollowToggleBtn.textContent = 'Follow';
-        profileFollowToggleBtn.className = 'btn-primary';
+        profileFollowToggleBtn.className = 'btn btn-reddit-blue btn-sm';
       }
       profileFollowToggleBtn.onclick = async () => {
         if (!currentUser) {
@@ -888,16 +898,20 @@ async function refreshProfileView() {
     updateProfileTabButtons();
     loadProfileTabContent(user);
   } catch (err) {
-    profileTabContent.innerHTML = '<div class="empty-state">Error loading profile data.</div>';
+    profileTabContent.innerHTML = '<div class="card p-3 text-center text-danger">Error loading profile data.</div>';
   }
 }
 
 profileEditToggleBtn.addEventListener('click', () => {
-  profileEditSection.style.display = profileEditSection.style.display === 'none' ? 'block' : 'none';
+  if (profileEditSection.classList.contains('d-none')) {
+    profileEditSection.classList.remove('d-none');
+  } else {
+    profileEditSection.classList.add('d-none');
+  }
 });
 
 cancelEditProfileBtn.addEventListener('click', () => {
-  profileEditSection.style.display = 'none';
+  profileEditSection.classList.add('d-none');
 });
 
 profileEditForm.addEventListener('submit', async (e) => {
@@ -916,7 +930,7 @@ profileEditForm.addEventListener('submit', async (e) => {
       })
     });
     if (res.ok) {
-      profileEditSection.style.display = 'none';
+      profileEditSection.classList.add('d-none');
       await fetchMe();
       await refreshProfileView();
       loadPosts();
@@ -928,12 +942,12 @@ profileEditForm.addEventListener('submit', async (e) => {
 });
 
 function updateProfileTabButtons() {
-  pTabPosts.classList.remove('active');
-  pTabFollowers.classList.remove('active');
-  pTabFollowing.classList.remove('active');
-  if (currentProfileTab === 'posts') pTabPosts.classList.add('active');
-  if (currentProfileTab === 'followers') pTabFollowers.classList.add('active');
-  if (currentProfileTab === 'following') pTabFollowing.classList.add('active');
+  pTabPosts.classList.remove('active', 'border-primary');
+  pTabFollowers.classList.remove('active', 'border-primary');
+  pTabFollowing.classList.remove('active', 'border-primary');
+  if (currentProfileTab === 'posts') pTabPosts.classList.add('active', 'border-primary');
+  if (currentProfileTab === 'followers') pTabFollowers.classList.add('active', 'border-primary');
+  if (currentProfileTab === 'following') pTabFollowing.classList.add('active', 'border-primary');
 }
 
 pTabPosts.addEventListener('click', () => {
@@ -955,21 +969,20 @@ pTabFollowing.addEventListener('click', () => {
 });
 
 async function loadProfileTabContent(targetUser) {
-  profileTabContent.innerHTML = '<div style="font-size: 13px; color: var(--text-muted);">Loading data...</div>';
+  profileTabContent.innerHTML = '<div class="text-secondary p-3 text-center" style="font-size: 13px;">Loading data...</div>';
   if (currentProfileTab === 'posts') {
     try {
       const res = await fetch(`${API_BASE}/api/posts?author=${targetUser.username}&sort=new`, { headers: getAuthHeader() });
       const data = await res.json();
       const posts = data.posts || [];
       if (posts.length === 0) {
-        profileTabContent.innerHTML = '<div class="empty-state">No technical posts submitted by this user yet.</div>';
+        profileTabContent.innerHTML = '<div class="card p-3 text-center text-secondary">No technical posts submitted by this user yet.</div>';
         return;
       }
       profileTabContent.innerHTML = '';
       posts.forEach(post => {
         const item = document.createElement('div');
-        item.className = 'post-card';
-        item.style.marginBottom = '6px';
+        item.className = 'post-card mb-2';
         item.innerHTML = `
           <div class="vote-rail">
             <span class="vote-count">${post.score}</span>
@@ -980,14 +993,14 @@ async function loadProfileTabContent(targetUser) {
               <span>•</span>
               <span>${post.comments_count} comments</span>
             </div>
-            <h3 class="post-title" style="font-size: 15px;">${escapeHtml(post.title)}</h3>
+            <h5 class="post-title" style="font-size: 15px;">${escapeHtml(post.title)}</h5>
             <div class="post-text" style="font-size: 13px;">${escapeHtml(post.content)}</div>
           </div>
         `;
         profileTabContent.appendChild(item);
       });
     } catch (err) {
-      profileTabContent.innerHTML = '<div class="empty-state">Failed to load posts</div>';
+      profileTabContent.innerHTML = '<div class="card p-3 text-center text-danger">Failed to load posts</div>';
     }
   } else if (currentProfileTab === 'followers') {
     try {
@@ -995,7 +1008,7 @@ async function loadProfileTabContent(targetUser) {
       const data = await res.json();
       renderUserList(data.followers || [], 'No followers yet.');
     } catch (err) {
-      profileTabContent.innerHTML = '<div class="empty-state">Failed to load followers</div>';
+      profileTabContent.innerHTML = '<div class="card p-3 text-center text-danger">Failed to load followers</div>';
     }
   } else if (currentProfileTab === 'following') {
     try {
@@ -1003,14 +1016,14 @@ async function loadProfileTabContent(targetUser) {
       const data = await res.json();
       renderUserList(data.following || [], 'Not following any users yet.');
     } catch (err) {
-      profileTabContent.innerHTML = '<div class="empty-state">Failed to load following list</div>';
+      profileTabContent.innerHTML = '<div class="card p-3 text-center text-danger">Failed to load following list</div>';
     }
   }
 }
 
 function renderUserList(users, emptyMessage) {
   if (users.length === 0) {
-    profileTabContent.innerHTML = `<div class="empty-state">${escapeHtml(emptyMessage)}</div>`;
+    profileTabContent.innerHTML = `<div class="card p-3 text-center text-secondary">${escapeHtml(emptyMessage)}</div>`;
     return;
   }
   profileTabContent.innerHTML = '';
@@ -1022,7 +1035,7 @@ function renderUserList(users, emptyMessage) {
     const isOwn = currentUser && currentUser.id === u.id;
     if (currentUser && !isOwn) {
       followBtnHtml = `
-        <button class="btn-subtle follow-action-btn" data-uid="${u.id}">
+        <button class="btn btn-sm ${u.is_following ? 'btn-light border' : 'btn-reddit-blue'} py-0 px-2 fw-bold follow-action-btn" style="font-size: 11px;" data-uid="${u.id}">
           ${u.is_following ? 'Following' : 'Follow'}
         </button>
       `;
@@ -1067,8 +1080,6 @@ function renderUserList(users, emptyMessage) {
   });
 }
 
-closeProfileModal.addEventListener('click', () => profileModal.classList.add('hidden'));
-
 navProfilePill.addEventListener('click', () => {
   if (currentUser) openUserProfile(currentUser.username);
 });
@@ -1078,12 +1089,24 @@ sidebarViewProfileBtn.addEventListener('click', () => {
 });
 
 function updateSortButtons() {
-  sortHotBtn.classList.remove('active');
-  sortNewBtn.classList.remove('active');
-  sortTopBtn.classList.remove('active');
-  if (currentSort === 'hot') sortHotBtn.classList.add('active');
-  if (currentSort === 'new') sortNewBtn.classList.add('active');
-  if (currentSort === 'top') sortTopBtn.classList.add('active');
+  sortHotBtn.classList.remove('active', 'btn-primary');
+  sortNewBtn.classList.remove('active', 'btn-primary');
+  sortTopBtn.classList.remove('active', 'btn-primary');
+  sortHotBtn.classList.add('btn-light');
+  sortNewBtn.classList.add('btn-light');
+  sortTopBtn.classList.add('btn-light');
+  if (currentSort === 'hot') {
+    sortHotBtn.classList.add('active', 'btn-primary');
+    sortHotBtn.classList.remove('btn-light');
+  }
+  if (currentSort === 'new') {
+    sortNewBtn.classList.add('active', 'btn-primary');
+    sortNewBtn.classList.remove('btn-light');
+  }
+  if (currentSort === 'top') {
+    sortTopBtn.classList.add('active', 'btn-primary');
+    sortTopBtn.classList.remove('btn-light');
+  }
 }
 
 sortHotBtn.addEventListener('click', () => {
@@ -1123,34 +1146,21 @@ brandLogoBtn.addEventListener('click', () => {
 
 linkUserAgreement.addEventListener('click', (e) => {
   e.preventDefault();
-  tosModal.classList.remove('hidden');
+  if (bsTosModal) bsTosModal.show();
 });
-
-closeTosModal.addEventListener('click', () => tosModal.classList.add('hidden'));
-confirmTosBtn.addEventListener('click', () => tosModal.classList.add('hidden'));
 
 linkPrivacyPolicy.addEventListener('click', (e) => {
   e.preventDefault();
-  privacyModal.classList.remove('hidden');
+  if (bsPrivacyModal) bsPrivacyModal.show();
 });
-
-closePrivacyModal.addEventListener('click', () => privacyModal.classList.add('hidden'));
-confirmPrivacyBtn.addEventListener('click', () => privacyModal.classList.add('hidden'));
 
 linkContentPolicy.addEventListener('click', (e) => {
   e.preventDefault();
-  tosModal.classList.remove('hidden');
-});
-
-window.addEventListener('click', (e) => {
-  if (e.target === authModal) authModal.classList.add('hidden');
-  if (e.target === createPostModal) createPostModal.classList.add('hidden');
-  if (e.target === profileModal) profileModal.classList.add('hidden');
-  if (e.target === tosModal) tosModal.classList.add('hidden');
-  if (e.target === privacyModal) privacyModal.classList.add('hidden');
+  if (bsTosModal) bsTosModal.show();
 });
 
 async function initApp() {
+  initBootstrapComponents();
   await fetchMe();
   await loadDemoUsers();
   await loadCommunityStats();
@@ -1158,4 +1168,4 @@ async function initApp() {
   await loadPosts();
 }
 
-initApp();
+document.addEventListener('DOMContentLoaded', initApp);
