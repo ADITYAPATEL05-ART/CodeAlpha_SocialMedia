@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>INCREDIBLE_x_TECH</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+
+  <header class="top-navbar">
+    <div class="nav-left">
+      <div class="brand-logo" id="brandLogoBtn">
+        <div class="logo-badge">ixT</div>
+        <div class="brand-text-wrap">
+          <span class="brand-title">INCREDIBLE_x_TECH</span>
+          <span class="brand-sub">r/INCREDIBLE_x_TECH</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-center">
+      <div class="search-box">
+        <svg class="search-icon" viewBox="0 0 20 20">
+          <path d="M14.386 12.97a7.5 7.5 0 1 0-1.414 1.414l4.243 4.243 1.414-1.414-4.243-4.243zm-4.886.53a5.5 5.5 0 1 1 0-11 5.5 5.5 0 0 1 0 11z"/>
+        </svg>
+        <input type="text" id="searchInput" placeholder="Search INCREDIBLE_x_TECH">
+      </div>
+    </div>
+
+    <div class="nav-right" id="navAuthArea">
+      <select id="quickDemoSelect" class="demo-selector">
+        <option value="">Switch Demo Account</option>
+      </select>
+      <div id="loggedOutButtons" style="display: flex; gap: 8px;">
+        <button class="btn-outline" id="openLoginBtn">Log In</button>
+        <button class="btn-primary" id="openSignupBtn">Sign Up</button>
+      </div>
+      <div id="loggedInArea" style="display: none; align-items: center; gap: 8px;">
+        <button class="btn-orange" id="navbarCreateBtn">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
+            <path d="M8 2a.75.75 0 0 1 .75.75v4.5h4.5a.75.75 0 0 1 0 1.5h-4.5v4.5a.75.75 0 0 1-1.5 0v-4.5h-4.5a.75.75 0 0 1 0-1.5h4.5v-4.5A.75.75 0 0 1 8 2z"/>
+          </svg>
+          Create Post
+        </button>
+        <div class="user-profile-pill" id="navProfilePill">
+          <img class="pill-avatar" id="navUserAvatar" src="/media/avatar1.jpg" alt="User">
+          <div class="pill-details">
+            <span class="pill-name" id="navUserName">User</span>
+            <span class="pill-karma" id="navUserKarma">0 karma</span>
+          </div>
+        </div>
+        <button class="btn-subtle" id="logoutBtn">Logout</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="layout-container">
+    <section class="feed-column">
+      <div class="create-trigger-card" id="feedCreateTrigger">
+        <img class="trigger-avatar" id="triggerAvatar" src="/media/avatar1.jpg" alt="User">
+        <input type="text" class="create-trigger-input" placeholder="Create Post in r/INCREDIBLE_x_TECH" readonly>
+      </div>
+
+      <div class="feed-sort-bar">
+        <button class="sort-btn active" data-sort="hot" id="sortHotBtn">
+          <svg class="sort-icon" viewBox="0 0 20 20">
+            <path d="M12.3 2.1c-.2-.1-.5 0-.6.2C10.7 4.2 9.5 6 9.5 7.8c0 .2 0 .4.1.6C8.8 7.6 8 6.4 8 5.1c0-.3-.2-.5-.5-.5s-.4.2-.5.4C5.7 7.7 4.5 10 4.5 12.3 4.5 16.5 7.9 20 12 20s7.5-3.5 7.5-7.7c0-4.6-3.8-8.5-7.2-10.2zm-.3 15.9c-2.8 0-5-2.2-5-5 0-1.2.5-2.5 1.2-3.6.4 2.2 2 3.6 4.1 3.6.3 0 .5-.2.5-.5 0-1.4.6-2.7 1.6-3.6 1.7 1.8 2.6 4.2 2.6 6.1 0 2.8-2.2 5-5 5z"/>
+          </svg>
+          Hot
+        </button>
+        <button class="sort-btn" data-sort="new" id="sortNewBtn">
+          <svg class="sort-icon" viewBox="0 0 20 20">
+            <path d="M10 2a8 8 0 1 0 8 8 8 8 0 0 0-8-8zm1 8.5v3.5a1 1 0 0 1-2 0v-4a1 1 0 0 1 1-1h4a1 1 0 0 1 0 2h-3z"/>
+          </svg>
+          New
+        </button>
+        <button class="sort-btn" data-sort="top" id="sortTopBtn">
+          <svg class="sort-icon" viewBox="0 0 20 20">
+            <path d="M4 11a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-6zm5-5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v11a1 1 0 0 1-1 1h-2a1 1 0 0 1-1-1V6zm5-3a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-2a1 1 0 0 1-1-1V3z"/>
+          </svg>
+          Top
+        </button>
+      </div>
+
+      <div class="posts-feed" id="postsFeed">
+        <div class="empty-state">Loading posts...</div>
+      </div>
+    </section>
+
+    <aside class="sidebar-column">
+      <div class="sidebar-box">
+        <div class="sidebar-box-header">About Community</div>
+        <div class="sidebar-box-content">
+          <div class="community-name-row">
+            <div class="community-icon">ixT</div>
+            <div class="community-title-text">r/INCREDIBLE_x_TECH</div>
+          </div>
+          <p class="community-desc">
+            The premier hub for systems architects, software engineers, and technical pioneers discussing production engineering, distributed systems, and modern computing.
+          </p>
+          <div class="community-stats">
+            <div class="stat-item">
+              <span class="stat-num" id="statMembers">0</span>
+              <span class="stat-label">Engineers</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-num" id="statOnline">0</span>
+              <span class="stat-label">Online</span>
+            </div>
+          </div>
+          <button class="btn-primary" id="sidebarCreateBtn" style="width: 100%;">Create Post</button>
+        </div>
+      </div>
+
+      <div class="sidebar-box" id="sidebarUserBox" style="display: none;">
+        <div class="sidebar-box-header">My Profile Summary</div>
+        <div class="sidebar-box-content">
+          <div class="sidebar-user-card">
+            <div class="sidebar-user-top">
+              <img id="sidebarUserAvatar" class="sidebar-user-avatar" src="/media/avatar1.jpg" alt="Avatar">
+              <div>
+                <div id="sidebarUserDisplayName" class="sidebar-user-name">User</div>
+                <div id="sidebarUserHandle" class="sidebar-user-handle">u/user</div>
+              </div>
+            </div>
+            <div id="sidebarUserBio" class="sidebar-user-bio"></div>
+            <div class="community-stats" style="margin-top: 4px;">
+              <div class="stat-item">
+                <span class="stat-num" id="sidebarFollowersCount">0</span>
+                <span class="stat-label">Followers</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-num" id="sidebarFollowingCount">0</span>
+                <span class="stat-label">Following</span>
+              </div>
+            </div>
+            <button class="btn-outline" id="sidebarViewProfileBtn" style="width: 100%;">View Full Profile</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="sidebar-box">
+        <div class="sidebar-box-header">r/INCREDIBLE_x_TECH Rules</div>
+        <div class="sidebar-box-content">
+          <ol class="rules-list">
+            <li>
+              <span class="rule-title">Technical Substance Only:</span> Posts must provide verifiable engineering depth or architecture discussion.
+            </li>
+            <li>
+              <span class="rule-title">Respectful Debate:</span> Critique architectural choices and code, never individuals.
+            </li>
+            <li>
+              <span class="rule-title">Attribute Benchmarks:</span> Cite methodology, hardware configuration, and reproducible data.
+            </li>
+            <li>
+              <span class="rule-title">No Spam:</span> Unsolicited marketing or low-effort promotional links will be purged.
+            </li>
+          </ol>
+        </div>
+      </div>
+
+      <div class="sidebar-box">
+        <div class="sidebar-footer-links">
+          <a href="#" id="linkUserAgreement">User Agreement</a>
+          <a href="#" id="linkPrivacyPolicy">Privacy Policy</a>
+          <a href="#" id="linkContentPolicy">Content Policy</a>
+        </div>
+        <div class="copyright-text">
+          INCREDIBLE_x_TECH Inc. © 2026. All rights reserved.
+        </div>
+      </div>
+    </aside>
+  </main>
+
+  <div class="modal-backdrop hidden" id="authModal">
+    <div class="modal-window">
+      <div class="modal-header">
+        <span class="modal-title" id="authModalTitle">Log In</span>
+        <button class="modal-close-btn" id="closeAuthModal">&times;</button>
+      </div>
+      <div class="tab-nav">
+        <button class="tab-btn active" id="tabLoginBtn">Log In</button>
+        <button class="tab-btn" id="tabSignupBtn">Sign Up</button>
+      </div>
+      <div class="modal-body">
+        <form id="authForm" style="display: flex; flex-direction: column; gap: 12px;">
+          <div class="form-group" id="displayNameGroup" style="display: none;">
+            <label class="form-label" for="authDisplayName">Display Name</label>
+            <input type="text" id="authDisplayName" placeholder="e.g. Alex Rivera">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="authUsername">Username</label>
+            <input type="text" id="authUsername" placeholder="e.g. alex_tech" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="authPassword">Password</label>
+            <input type="password" id="authPassword" placeholder="Minimum 6 characters" required>
+          </div>
+          <div class="form-group" id="bioGroup" style="display: none;">
+            <label class="form-label" for="authBio">Bio (Optional)</label>
+            <input type="text" id="authBio" placeholder="Engineering focus or systems interest">
+          </div>
+          <div id="authError" style="color: var(--danger); font-size: 13px; display: none;"></div>
+          <button type="submit" class="btn-primary" id="authSubmitBtn" style="width: 100%; padding: 10px; margin-top: 8px;">Log In</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop hidden" id="createPostModal">
+    <div class="modal-window modal-wide">
+      <div class="modal-header">
+        <span class="modal-title">Create a Post in r/INCREDIBLE_x_TECH</span>
+        <button class="modal-close-btn" id="closeCreateModal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="createPostForm" style="display: flex; flex-direction: column; gap: 14px;">
+          <div class="form-group">
+            <label class="form-label" for="postTitleInput">Title</label>
+            <input type="text" id="postTitleInput" placeholder="Title of your technical discussion or architecture deep dive" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="postContentInput">Body Text</label>
+            <textarea id="postContentInput" rows="6" placeholder="Provide background, technical details, benchmarks, or trade-offs..." required></textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Attach Media (Copyright Free)</label>
+            <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 6px;">Select a copyright-free tech image or upload your own:</div>
+            <div class="media-picker-grid" id="freeMediaGrid"></div>
+            <input type="hidden" id="selectedImageUrl" value="">
+            <div style="display: flex; gap: 8px; margin-top: 8px; align-items: center;">
+              <input type="file" id="postImageFile" accept="image/*" style="font-size: 12px;">
+              <button type="button" class="btn-subtle" id="clearImageBtn" style="font-size: 11px;">Clear Media</button>
+            </div>
+            <div id="imageSelectedPreview" style="margin-top: 8px; font-size: 12px; color: var(--reddit-blue); font-weight: 600;"></div>
+          </div>
+          <div id="postError" style="color: var(--danger); font-size: 13px; display: none;"></div>
+          <div class="modal-footer" style="padding: 10px 0 0 0; background: none; border-top: none;">
+            <button type="button" class="btn-subtle" id="cancelCreatePostBtn">Cancel</button>
+            <button type="submit" class="btn-primary" id="submitPostBtn">Post</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop hidden" id="profileModal">
+    <div class="modal-window modal-wide">
+      <div class="modal-header">
+        <span class="modal-title" id="profileModalTitle">User Profile</span>
+        <button class="modal-close-btn" id="closeProfileModal">&times;</button>
+      </div>
+      <div class="modal-body" style="gap: 16px;">
+        <div class="profile-header-card">
+          <img id="profileViewAvatar" class="profile-avatar-large" src="/media/avatar1.jpg" alt="Avatar">
+          <div class="profile-details-wrap">
+            <div class="profile-top-name-row">
+              <div>
+                <div id="profileViewDisplayName" class="profile-display-name">Alex Rivera</div>
+                <div id="profileViewUsername" class="profile-username-tag">u/alex_tech</div>
+              </div>
+              <div id="profileActionArea">
+                <button class="btn-primary" id="profileFollowToggleBtn">Follow</button>
+                <button class="btn-subtle" id="profileEditToggleBtn" style="display: none;">Edit Profile</button>
+              </div>
+            </div>
+            <p id="profileViewBio" style="font-size: 13px; color: var(--text-main); margin-top: 4px;"></p>
+            <div class="profile-stats-bar">
+              <div><strong id="profileFollowersNum">0</strong> followers</div>
+              <div><strong id="profileFollowingNum">0</strong> following</div>
+              <div><strong id="profilePostsNum">0</strong> posts</div>
+              <div><strong id="profileKarmaNum">0</strong> karma</div>
+            </div>
+          </div>
+        </div>
+
+        <div id="profileEditSection" style="display: none; background-color: var(--bg-card-subtle); padding: 12px; border: 1px solid var(--border-color); border-radius: var(--radius);">
+          <div style="font-weight: 700; font-size: 13px; margin-bottom: 8px;">Edit Profile Information</div>
+          <form id="profileEditForm" style="display: flex; flex-direction: column; gap: 10px;">
+            <div class="form-group">
+              <label class="form-label" for="editDisplayNameInput">Display Name</label>
+              <input type="text" id="editDisplayNameInput">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="editBioInput">Bio</label>
+              <input type="text" id="editBioInput">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Avatar</label>
+              <select id="editAvatarSelect" class="demo-selector">
+                <option value="/media/avatar1.jpg">Avatar 1</option>
+                <option value="/media/avatar2.jpg">Avatar 2</option>
+                <option value="/media/avatar3.jpg">Avatar 3</option>
+                <option value="/media/avatar4.jpg">Avatar 4</option>
+              </select>
+            </div>
+            <div style="display: flex; justify-content: flex-end; gap: 8px;">
+              <button type="button" class="btn-subtle" id="cancelEditProfileBtn">Cancel</button>
+              <button type="submit" class="btn-primary">Save Changes</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="profile-tabs-bar">
+          <button class="profile-tab active" data-tab="posts" id="pTabPosts">Posts</button>
+          <button class="profile-tab" data-tab="followers" id="pTabFollowers">Followers</button>
+          <button class="profile-tab" data-tab="following" id="pTabFollowing">Following</button>
+        </div>
+
+        <div id="profileTabContent" style="display: flex; flex-direction: column; gap: 10px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop hidden" id="tosModal">
+    <div class="modal-window">
+      <div class="modal-header">
+        <span class="modal-title">INCREDIBLE_x_TECH User Agreement</span>
+        <button class="modal-close-btn" id="closeTosModal">&times;</button>
+      </div>
+      <div class="modal-body document-body">
+        <h4>1. Acceptance of Terms</h4>
+        <p>By accessing or using the INCREDIBLE_x_TECH platform, you agree to be bound by these Terms of Service. If you disagree with any portion of these terms, you must not access the platform.</p>
+        <h4>2. User Accounts and Responsibilities</h4>
+        <p>You are responsible for maintaining the confidentiality of your account credentials and for all activities that occur under your account. You agree to provide accurate registration information.</p>
+        <h4>3. Acceptable Technical Conduct</h4>
+        <p>INCREDIBLE_x_TECH is dedicated to high-quality technical collaboration and engineering discourse. You agree not to post malicious payloads, automated spam, defamatory content, or unauthorized copyrighted material.</p>
+        <h4>4. Intellectual Property and Licenses</h4>
+        <p>You retain ownership of any technical contributions or code snippets you publish. By posting content to r/INCREDIBLE_x_TECH, you grant the platform a non-exclusive license to host, display, and distribute such content.</p>
+        <h4>5. Limitation of Liability</h4>
+        <p>Code snippets, architectural designs, and benchmarks provided on this platform are for informational purposes only. The platform operators are not liable for production outages or damages resulting from code implementations.</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-primary" id="confirmTosBtn">Acknowledge</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop hidden" id="privacyModal">
+    <div class="modal-window">
+      <div class="modal-header">
+        <span class="modal-title">INCREDIBLE_x_TECH Privacy Policy</span>
+        <button class="modal-close-btn" id="closePrivacyModal">&times;</button>
+      </div>
+      <div class="modal-body document-body">
+        <h4>1. Information We Collect</h4>
+        <p>We collect information you provide directly to us when creating an account, including your username, display name, biography, and the technical posts and comments you submit.</p>
+        <h4>2. Use of Information</h4>
+        <p>We use the collected information to operate and maintain the social media platform, authenticate your identity, display your technical contributions, and track follower relationships.</p>
+        <h4>3. Data Storage and Security</h4>
+        <p>User passwords are encrypted using secure cryptographic hashing algorithms. We implement appropriate safeguards to preserve the integrity of user data against unauthorized access.</p>
+        <h4>4. Third-Party Sharing</h4>
+        <p>INCREDIBLE_x_TECH does not sell, rent, or trade your personal information to third-party advertisers or data brokers.</p>
+        <h4>5. Data Retention and Removal</h4>
+        <p>You have the right to request deletion of your account and associated technical posts at any time by contacting platform administration.</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-primary" id="confirmPrivacyBtn">Acknowledge</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast hidden" id="appToast"></div>
+
+  <script src="/app.js"></script>
+</body>
+</html>
