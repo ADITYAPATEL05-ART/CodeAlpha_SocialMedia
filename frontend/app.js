@@ -28,6 +28,17 @@ const menuItemLogout = document.getElementById('menuItemLogout');
 const headerMoreBtn = document.getElementById('headerMoreBtn');
 const navHamburgerBtn = document.getElementById('navHamburgerBtn');
 
+const navDrawer = document.getElementById('navDrawer');
+const drawerBackdrop = document.getElementById('drawerBackdrop');
+const drawerCloseBtn = document.getElementById('drawerCloseBtn');
+const drawerBrandBtn = document.getElementById('drawerBrandBtn');
+const drawerHomeBtn = document.getElementById('drawerHomeBtn');
+const drawerPopularBtn = document.getElementById('drawerPopularBtn');
+const drawerLatestBtn = document.getElementById('drawerLatestBtn');
+const drawerRulesBtn = document.getElementById('drawerRulesBtn');
+const drawerTosBtn = document.getElementById('drawerTosBtn');
+const drawerPrivacyBtn = document.getElementById('drawerPrivacyBtn');
+
 const sortDropdownTrigger = document.getElementById('sortDropdownTrigger');
 const currentSortLabel = document.getElementById('currentSortLabel');
 const filterRegionBtn = document.getElementById('filterRegionBtn');
@@ -1202,10 +1213,91 @@ filterViewModeBtn.addEventListener('click', () => {
   showToast(`View switched to ${currentViewMode} mode`);
 });
 
-navHamburgerBtn.addEventListener('click', () => {
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-  showToast('INCREDIBLE_x_TECH Navigation Menu');
+function openNavDrawer() {
+  if (navDrawer && drawerBackdrop) {
+    navDrawer.classList.add('open');
+    drawerBackdrop.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+}
+
+function closeNavDrawer() {
+  if (navDrawer && drawerBackdrop) {
+    navDrawer.classList.remove('open');
+    drawerBackdrop.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+}
+
+if (navHamburgerBtn) {
+  navHamburgerBtn.addEventListener('click', openNavDrawer);
+}
+if (drawerCloseBtn) {
+  drawerCloseBtn.addEventListener('click', closeNavDrawer);
+}
+if (drawerBackdrop) {
+  drawerBackdrop.addEventListener('click', closeNavDrawer);
+}
+if (drawerBrandBtn) {
+  drawerBrandBtn.addEventListener('click', () => {
+    closeNavDrawer();
+    brandLogoBtn.click();
+  });
+}
+if (drawerHomeBtn) {
+  drawerHomeBtn.addEventListener('click', () => {
+    closeNavDrawer();
+    currentSort = 'hot';
+    currentSortLabel.textContent = 'Best';
+    loadPosts();
+  });
+}
+if (drawerPopularBtn) {
+  drawerPopularBtn.addEventListener('click', () => {
+    closeNavDrawer();
+    currentSort = 'top';
+    currentSortLabel.textContent = 'Top';
+    loadPosts();
+  });
+}
+if (drawerLatestBtn) {
+  drawerLatestBtn.addEventListener('click', () => {
+    closeNavDrawer();
+    currentSort = 'new';
+    currentSortLabel.textContent = 'New';
+    loadPosts();
+  });
+}
+
+document.querySelectorAll('[data-filter-tag]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const tag = btn.getAttribute('data-filter-tag');
+    closeNavDrawer();
+    searchInput.value = tag;
+    currentSearch = tag;
+    loadPosts();
+    showToast(`Filtering by ${tag}`);
+  });
 });
+
+if (drawerRulesBtn) {
+  drawerRulesBtn.addEventListener('click', () => {
+    closeNavDrawer();
+    showToast('Viewing r/INCREDIBLE_x_TECH Community Rules');
+  });
+}
+if (drawerTosBtn) {
+  drawerTosBtn.addEventListener('click', () => {
+    closeNavDrawer();
+    if (bsTosModal) bsTosModal.show();
+  });
+}
+if (drawerPrivacyBtn) {
+  drawerPrivacyBtn.addEventListener('click', () => {
+    closeNavDrawer();
+    if (bsPrivacyModal) bsPrivacyModal.show();
+  });
+}
 
 headerMoreBtn.addEventListener('click', () => {
   if (bsTosModal) bsTosModal.show();
