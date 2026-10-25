@@ -687,12 +687,30 @@ app.get('/api/community/stats', (req, res) => {
 
 app.get('/api/free-media', (req, res) => {
   const mediaFiles = [
+    { label: 'Cloud Datacenter Infrastructure', url: '/media/server_datacenter.jpg' },
+    { label: 'Circuit Board Microarchitecture', url: '/media/circuit_board.jpg' },
+    { label: 'Cybersecurity Terminal Interface', url: '/media/cyber_security.jpg' },
+    { label: 'Dual Monitor Development Station', url: '/media/dual_monitors.jpg' },
+    { label: 'Global Cloud Network Infrastructure', url: '/media/cloud_infrastructure.jpg' },
+    { label: 'Robotics and Embedded Hardware', url: '/media/robotics_tech.jpg' },
+    { label: 'Programming and Algorithm Workspace', url: '/media/programming_code.jpg' },
+    { label: 'Mechanical Keyboard Workstation', url: '/media/mechanical_keyboard.jpg' },
+    { label: 'Low Level Kernel Terminal', url: '/media/hacker_terminal.jpg' },
+    { label: 'High Density AI Accelerator Chip', url: '/media/ai_chip.jpg' },
+    { label: 'Quantum Computing Laboratory', url: '/media/quantum_compute.jpg' },
+    { label: 'High Speed Datacenter Fiber Cabling', url: '/media/data_cables.jpg' },
+    { label: 'Software Engineering Architecture', url: '/media/software_engineer.jpg' },
+    { label: 'Deep Learning Model Training Screen', url: '/media/deep_learning.jpg' },
     { label: 'Cloud Infrastructure Rack', url: '/media/cloud_servers.jpg' },
     { label: 'Distributed Systems Terminal', url: '/media/developer_desk.jpg' },
     { label: 'Engineering Architecture Workspace', url: '/media/laptop_workspace.jpg' },
     { label: 'Hardware Microarchitecture', url: '/media/tech_hardware.jpg' },
     { label: 'High Performance Coding Station', url: '/media/coding_setup.jpg' },
-    { label: 'Mobile Edge Systems', url: '/media/mobile_app.jpg' }
+    { label: 'Mobile Edge Systems', url: '/media/mobile_app.jpg' },
+    { label: 'Modern Workstation Setup', url: '/media/workstation_desk.jpg' },
+    { label: 'Multi-display Tech Setup', url: '/media/tech_setup2.jpg' },
+    { label: 'Clean Engineer Desk', url: '/media/office_desk.jpg' },
+    { label: 'Terminal Screen Interface', url: '/media/screen_terminal.jpg' }
   ];
   res.json({ media: mediaFiles });
 });

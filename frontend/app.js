@@ -7,48 +7,38 @@ let freeMediaList = [];
 let selectedMediaUrl = '';
 let currentProfileUsername = null;
 let currentProfileTab = 'posts';
-let postsOffset = 0;
+let currentViewMode = 'card';
+let allPosts = [];
+let displayedCount = 10;
 
 const brandLogoBtn = document.getElementById('brandLogoBtn');
 const searchInput = document.getElementById('searchInput');
 const quickDemoSelect = document.getElementById('quickDemoSelect');
 const loggedOutButtons = document.getElementById('loggedOutButtons');
 const loggedInArea = document.getElementById('loggedInArea');
+const openAppActionBtn = document.getElementById('openAppActionBtn');
 const openLoginBtn = document.getElementById('openLoginBtn');
-const openSignupBtn = document.getElementById('openSignupBtn');
 const navbarCreateBtn = document.getElementById('navbarCreateBtn');
 const navProfilePill = document.getElementById('navProfilePill');
 const navUserAvatar = document.getElementById('navUserAvatar');
 const navUserName = document.getElementById('navUserName');
-const navUserKarma = document.getElementById('navUserKarma');
-const logoutBtn = document.getElementById('logoutBtn');
 const userMenuFlyout = document.getElementById('userMenuFlyout');
 const menuItemProfile = document.getElementById('menuItemProfile');
-const menuItemSettings = document.getElementById('menuItemSettings');
 const menuItemLogout = document.getElementById('menuItemLogout');
+const headerMoreBtn = document.getElementById('headerMoreBtn');
+const navHamburgerBtn = document.getElementById('navHamburgerBtn');
 
-const navDiscoverBtn = document.getElementById('navDiscoverBtn');
-const navChatBtn = document.getElementById('navChatBtn');
-const navBellBtn = document.getElementById('navBellBtn');
-const headerJoinBtn = document.getElementById('headerJoinBtn');
-const headerBellBtn = document.getElementById('headerBellBtn');
-
-const subtabPosts = document.getElementById('subtabPosts');
-const subtabRules = document.getElementById('subtabRules');
-const subtabWiki = document.getElementById('subtabWiki');
-const subtabGuidelines = document.getElementById('subtabGuidelines');
-const subtabFaq = document.getElementById('subtabFaq');
+const sortDropdownTrigger = document.getElementById('sortDropdownTrigger');
+const currentSortLabel = document.getElementById('currentSortLabel');
+const filterRegionBtn = document.getElementById('filterRegionBtn');
+const filterViewModeBtn = document.getElementById('filterViewModeBtn');
 
 const feedCreateTrigger = document.getElementById('feedCreateTrigger');
 const triggerAvatar = document.getElementById('triggerAvatar');
 const quickImageBtn = document.getElementById('quickImageBtn');
-const quickLinkBtn = document.getElementById('quickLinkBtn');
-const sortHotBtn = document.getElementById('sortHotBtn');
-const sortNewBtn = document.getElementById('sortNewBtn');
-const sortTopBtn = document.getElementById('sortTopBtn');
-const feedCountTag = document.getElementById('feedCountTag');
 const postsFeed = document.getElementById('postsFeed');
 const loadMorePostsBtn = document.getElementById('loadMorePostsBtn');
+const infiniteScrollStatus = document.getElementById('infiniteScrollStatus');
 
 const sidebarCreateBtn = document.getElementById('sidebarCreateBtn');
 const sidebarUserBox = document.getElementById('sidebarUserBox');
@@ -168,6 +158,15 @@ function timeAgo(dateString) {
   return date.toLocaleDateString();
 }
 
+function formatScore(score) {
+  if (score === null || score === undefined) return '0';
+  const num = Number(score);
+  if (Math.abs(num) >= 1000) {
+    return (num / 1000).toFixed(1) + 'K';
+  }
+  return String(num);
+}
+
 function escapeHtml(text) {
   if (!text) return '';
   return text
@@ -176,17 +175,6 @@ function escapeHtml(text) {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#039;');
-}
-
-function getFlairForPost(title) {
-  const lower = title.toLowerCase();
-  if (lower.includes('kernel') || lower.includes('ebpf') || lower.includes('linux')) return 'Kernel';
-  if (lower.includes('hardware') || lower.includes('cpu') || lower.includes('gpu')) return 'Hardware';
-  if (lower.includes('wasm') || lower.includes('runtime')) return 'Runtimes';
-  if (lower.includes('distributed') || lower.includes('raft') || lower.includes('cache')) return 'Distributed Systems';
-  if (lower.includes('storage') || lower.includes('database') || lower.includes('wal') || lower.includes('postgres')) return 'Databases';
-  if (lower.includes('lock-free') || lower.includes('c++') || lower.includes('concurrency')) return 'Concurrency';
-  return 'Architecture';
 }
 
 async function fetchMe() {
@@ -223,7 +211,7 @@ function updateAuthUI() {
     sidebarUserAvatar.src = resolveUrl(currentUser.avatar_url || '/media/avatar1.jpg');
     sidebarUserDisplayName.textContent = currentUser.display_name;
     sidebarUserHandle.textContent = `u/${currentUser.username}`;
-    sidebarUserBio.textContent = currentUser.bio || 'Technical engineer on r/INCREDIBLE_x_TECH.';
+    sidebarUserBio.textContent = currentUser.bio || 'Systems engineer on r/INCREDIBLE_x_TECH.';
     sidebarFollowersCount.textContent = currentUser.followers_count || 0;
     sidebarFollowingCount.textContent = currentUser.following_count || 0;
   } else {
@@ -243,7 +231,7 @@ async function loadDemoUsers() {
     data.users.forEach(u => {
       const opt = document.createElement('option');
       opt.value = u.username;
-      opt.textContent = `Switch to u/${u.username} (${u.display_name})`;
+      opt.textContent = `u/${u.username} (${u.display_name})`;
       quickDemoSelect.appendChild(opt);
     });
   } catch (err) {}
@@ -319,49 +307,58 @@ function renderFreeMediaGrid() {
 }
 
 async function loadPosts() {
-  postsFeed.innerHTML = '<div class="reddit-post-card p-4 text-center text-secondary">Loading discussions...</div>';
+  postsFeed.innerHTML = '<div class="modern-post-card text-center p-4 text-secondary">Loading discussions...</div>';
   try {
     const url = `${API_BASE}/api/posts?sort=${currentSort}&search=${encodeURIComponent(currentSearch)}`;
     const res = await fetch(url, { headers: getAuthHeader() });
     const data = await res.json();
-    renderPosts(data.posts || []);
+    allPosts = data.posts || [];
+    displayedCount = 10;
+    renderVisiblePosts();
   } catch (err) {
-    postsFeed.innerHTML = '<div class="reddit-post-card p-4 text-center text-danger">Failed to load discussions. Please try again.</div>';
+    postsFeed.innerHTML = '<div class="modern-post-card text-center p-4 text-danger">Failed to load discussions. Please try again.</div>';
+  }
+}
+
+function renderVisiblePosts() {
+  if (allPosts.length === 0) {
+    postsFeed.innerHTML = `
+      <div class="modern-post-card text-center p-4 text-secondary">
+        <h5 class="text-dark fw-bold">No Discussions Found</h5>
+        <p class="mb-0">There are no discussions matching your criteria. Be the first to share technical knowledge.</p>
+      </div>
+    `;
+    loadMorePostsBtn.style.display = 'none';
+    return;
+  }
+
+  const postsToRender = allPosts.slice(0, displayedCount);
+  renderPosts(postsToRender);
+
+  if (displayedCount >= allPosts.length) {
+    loadMorePostsBtn.style.display = 'none';
+  } else {
+    loadMorePostsBtn.style.display = 'inline-block';
   }
 }
 
 function renderPosts(posts) {
-  if (feedCountTag) {
-    feedCountTag.textContent = `${posts.length} Technical Discussions`;
-  }
-
-  if (posts.length === 0) {
-    postsFeed.innerHTML = `
-      <div class="reddit-post-card p-4 text-center text-secondary">
-        <h5 class="text-dark fw-bold">No Technical Discussions Found</h5>
-        <p class="mb-0">There are no posts matching your filter. Be the first to share an engineering architecture post.</p>
-      </div>
-    `;
-    return;
-  }
-
   postsFeed.innerHTML = '';
   posts.forEach(post => {
     const card = document.createElement('article');
-    card.className = 'reddit-post-card';
+    card.className = 'modern-post-card';
     card.id = `post-${post.id}`;
 
     const isUpvoted = post.user_vote === 1;
     const isDownvoted = post.user_vote === -1;
     const isAuthor = currentUser && currentUser.id === post.author.id;
     const isFollowing = post.author.is_following;
-    const flair = getFlairForPost(post.title);
 
     let followBtnHtml = '';
     if (currentUser && !isAuthor) {
       followBtnHtml = `
-        <button class="follow-tag-btn ${isFollowing ? 'is-following' : ''}" data-author-id="${post.author.id}">
-          ${isFollowing ? 'Following' : 'Follow'}
+        <button class="filter-dropdown-btn py-0 px-2 ms-1 text-primary fw-bold" data-author-id="${post.author.id}" style="font-size: 11px;">
+          ${isFollowing ? 'Following' : '+ Follow'}
         </button>
       `;
     }
@@ -369,8 +366,15 @@ function renderPosts(posts) {
     let mediaHtml = '';
     if (post.image_url) {
       mediaHtml = `
-        <div class="post-media-frame">
-          <img src="${resolveUrl(escapeHtml(post.image_url))}" alt="Post Media">
+        <div class="post-image-carousel">
+          <img src="${resolveUrl(escapeHtml(post.image_url))}" alt="Post Media" loading="lazy">
+          <button class="carousel-arrow-btn prev-btn" aria-label="Previous image">‹</button>
+          <button class="carousel-arrow-btn next-btn" aria-label="Next image">›</button>
+          <div class="carousel-indicator-dots">
+            <span class="indicator-dot active"></span>
+            <span class="indicator-dot"></span>
+            <span class="indicator-dot"></span>
+          </div>
         </div>
       `;
     }
@@ -378,68 +382,74 @@ function renderPosts(posts) {
     let deleteBtnHtml = '';
     if (isAuthor) {
       deleteBtnHtml = `
-        <button class="post-action-button delete-action" data-delete-post="${post.id}">
-          <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/><path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/></svg>
-          Delete
+        <button class="action-pill-btn delete-btn" data-delete-post="${post.id}" title="Delete Post">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
+            <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
+            <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
+          </svg>
         </button>
       `;
     }
 
     card.innerHTML = `
-      <div class="vote-rail">
-        <button class="vote-button ${isUpvoted ? 'upvote-active' : ''}" data-vote="1" title="Upvote">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 4l-8 8h5v8h6v-8h5z"/></svg>
-        </button>
-        <span class="vote-tally ${isUpvoted ? 'upvote-active' : isDownvoted ? 'downvote-active' : ''}">${post.score}</span>
-        <button class="vote-button ${isDownvoted ? 'downvote-active' : ''}" data-vote="-1" title="Downvote">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 20l8-8h-5V4H9v8H4z"/></svg>
-        </button>
-      </div>
-      <div class="post-content-container">
-        <div class="post-top-meta">
-          <span class="community-name-link">r/INCREDIBLE_x_TECH</span>
-          <span class="post-flair-badge">${flair}</span>
+      <div class="post-header-strip">
+        <div class="post-header-left">
+          <div class="community-icon-circle">r/</div>
+          <span class="community-handle-bold" data-community="INCREDIBLE_x_TECH">r/INCREDIBLE_x_TECH</span>
           <span>•</span>
-          <span>Posted by</span>
-          <span class="author-link" data-username="${escapeHtml(post.author.username)}">u/${escapeHtml(post.author.username)}</span>
-          <span>${timeAgo(post.created_at)}</span>
+          <span class="post-time-text">${timeAgo(post.created_at)}</span>
+          <span>•</span>
+          <span class="author-link-tag" data-username="${escapeHtml(post.author.username)}">u/${escapeHtml(post.author.username)}</span>
           ${followBtnHtml}
         </div>
-        <h2 class="post-headline">${escapeHtml(post.title)}</h2>
-        <div class="post-body-text">${escapeHtml(post.content)}</div>
-        ${mediaHtml}
-        <div class="post-bottom-actions">
-          <button class="post-action-button toggle-comments-btn" data-post-id="${post.id}">
-            <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor"><path d="M10 2C5.58 2 2 5.13 2 9c0 1.94.88 3.7 2.33 4.98L3.5 18l4.4-1.47C8.59 16.8 9.28 17 10 17c4.42 0 8-3.13 8-7s-3.58-7-8-7z"/></svg>
-            <span class="comments-count-text">${post.comments_count} Comments</span>
-          </button>
-          <button class="post-action-button share-post-btn" data-post-id="${post.id}">
-            <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor"><path d="M15 10l-6-6v3.5C4 8 2 12 2 16c1.5-2 3.5-3 7-3v3.5l6-6.5z"/></svg>
-            Share
-          </button>
-          <button class="post-action-button save-post-btn" data-post-id="${post.id}">
-            <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor"><path d="M5 2h10a1 1 0 0 1 1 1v15l-6-3.5L4 18V3a1 1 0 0 1 1-1z"/></svg>
-            Save
-          </button>
-          ${deleteBtnHtml}
-        </div>
-        <div class="comments-thread-box" style="display: none;" id="comments-drawer-${post.id}"></div>
+        <button class="header-dots-btn" title="Post options">···</button>
       </div>
+      <h2 class="post-card-title">${escapeHtml(post.title)}</h2>
+      <div class="post-card-body-text">${escapeHtml(post.content)}</div>
+      ${mediaHtml}
+      <div class="post-action-pills-row">
+        <div class="action-pill-vote">
+          <button class="vote-arrow-btn ${isUpvoted ? 'upvoted' : ''}" data-vote="1" title="Upvote" aria-label="Upvote">
+            <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor">
+              <path d="M10 3l-7 7h4v7h6v-7h4z"/>
+            </svg>
+          </button>
+          <span class="vote-tally-number ${isUpvoted ? 'upvoted' : isDownvoted ? 'downvoted' : ''}">${formatScore(post.score)}</span>
+          <button class="vote-arrow-btn ${isDownvoted ? 'downvoted' : ''}" data-vote="-1" title="Downvote" aria-label="Downvote">
+            <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor">
+              <path d="M10 17l7-7h-4V3H7v7H3z"/>
+            </svg>
+          </button>
+        </div>
+        <button class="action-pill-btn toggle-comments-btn" data-post-id="${post.id}">
+          <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor">
+            <path d="M10 2C5.58 2 2 5.13 2 9c0 1.94.88 3.7 2.33 4.98L3.5 18l4.4-1.47C8.59 16.8 9.28 17 10 17c4.42 0 8-3.13 8-7s-3.58-7-8-7z"/>
+          </svg>
+          <span class="comments-count-label">${formatScore(post.comments_count)}</span>
+        </button>
+        <button class="action-pill-btn share-post-btn" data-post-id="${post.id}" title="Share">
+          <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor">
+            <path d="M15 10l-6-6v3.5C4 8 2 12 2 16c1.5-2 3.5-3 7-3v3.5l6-6.5z"/>
+          </svg>
+        </button>
+        ${deleteBtnHtml}
+      </div>
+      <div class="post-comments-container" style="display: none;" id="comments-drawer-${post.id}"></div>
     `;
 
-    const upBtn = card.querySelector('.vote-button[data-vote="1"]');
-    const downBtn = card.querySelector('.vote-button[data-vote="-1"]');
-    const voteCountEl = card.querySelector('.vote-tally');
+    const upBtn = card.querySelector('.vote-arrow-btn[data-vote="1"]');
+    const downBtn = card.querySelector('.vote-arrow-btn[data-vote="-1"]');
+    const voteCountEl = card.querySelector('.vote-tally-number');
 
     upBtn.addEventListener('click', () => handleVote(post.id, 1, upBtn, downBtn, voteCountEl));
     downBtn.addEventListener('click', () => handleVote(post.id, -1, upBtn, downBtn, voteCountEl));
 
-    const authorLink = card.querySelector('.author-link');
+    const authorLink = card.querySelector('.author-link-tag');
     if (authorLink) {
       authorLink.addEventListener('click', () => openUserProfile(post.author.username));
     }
 
-    const followBtn = card.querySelector('.follow-tag-btn');
+    const followBtn = card.querySelector('[data-author-id]');
     if (followBtn) {
       followBtn.addEventListener('click', () => handleInlineFollow(post.author.id, followBtn));
     }
@@ -459,25 +469,53 @@ function renderPosts(posts) {
       });
     });
 
-    const saveBtn = card.querySelector('.save-post-btn');
-    saveBtn.addEventListener('click', () => {
-      showToast('Post saved to your bookmarks');
-    });
-
     const toggleCommentsBtn = card.querySelector('.toggle-comments-btn');
     const commentsDrawer = card.querySelector(`#comments-drawer-${post.id}`);
     toggleCommentsBtn.addEventListener('click', () => {
       if (commentsDrawer.style.display === 'none') {
         commentsDrawer.style.display = 'flex';
-        loadCommentsForPost(post.id, commentsDrawer, card.querySelector('.comments-count-text'));
+        loadCommentsForPost(post.id, commentsDrawer, card.querySelector('.comments-count-label'));
       } else {
         commentsDrawer.style.display = 'none';
       }
     });
 
+    const carouselArrows = card.querySelectorAll('.carousel-arrow-btn');
+    carouselArrows.forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const dots = card.querySelectorAll('.indicator-dot');
+        let activeIdx = 0;
+        dots.forEach((dot, idx) => {
+          if (dot.classList.contains('active')) activeIdx = idx;
+        });
+        dots[activeIdx].classList.remove('active');
+        if (btn.classList.contains('next-btn')) {
+          activeIdx = (activeIdx + 1) % dots.length;
+        } else {
+          activeIdx = (activeIdx - 1 + dots.length) % dots.length;
+        }
+        dots[activeIdx].classList.add('active');
+      });
+    });
+
     postsFeed.appendChild(card);
   });
 }
+
+loadMorePostsBtn.addEventListener('click', () => {
+  displayedCount += 10;
+  renderVisiblePosts();
+});
+
+window.addEventListener('scroll', () => {
+  if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 500) {
+    if (displayedCount < allPosts.length) {
+      displayedCount += 6;
+      renderVisiblePosts();
+    }
+  }
+});
 
 async function handleVote(postId, targetVote, upBtn, downBtn, countEl) {
   if (!currentUser) {
@@ -496,17 +534,17 @@ async function handleVote(postId, targetVote, upBtn, downBtn, countEl) {
     });
     if (res.ok) {
       const data = await res.json();
-      countEl.textContent = data.score;
-      upBtn.classList.remove('upvote-active');
-      downBtn.classList.remove('downvote-active');
-      countEl.classList.remove('upvote-active', 'downvote-active');
+      countEl.textContent = formatScore(data.score);
+      upBtn.classList.remove('upvoted');
+      downBtn.classList.remove('downvoted');
+      countEl.classList.remove('upvoted', 'downvoted');
 
       if (data.user_vote === 1) {
-        upBtn.classList.add('upvote-active');
-        countEl.classList.add('upvote-active');
+        upBtn.classList.add('upvoted');
+        countEl.classList.add('upvoted');
       } else if (data.user_vote === -1) {
-        downBtn.classList.add('downvote-active');
-        countEl.classList.add('downvote-active');
+        downBtn.classList.add('downvoted');
+        countEl.classList.add('downvoted');
       }
     }
   } catch (err) {
@@ -528,10 +566,8 @@ async function handleInlineFollow(authorId, buttonEl) {
       const data = await res.json();
       if (data.is_following) {
         buttonEl.textContent = 'Following';
-        buttonEl.classList.add('is-following');
       } else {
-        buttonEl.textContent = 'Follow';
-        buttonEl.classList.remove('is-following');
+        buttonEl.textContent = '+ Follow';
       }
       fetchMe();
     }
@@ -541,169 +577,169 @@ async function handleInlineFollow(authorId, buttonEl) {
 }
 
 async function handleDeletePost(postId) {
-  if (!confirm('Are you sure you want to permanently delete this technical discussion?')) return;
+  if (!confirm('Are you sure you want to permanently delete this discussion?')) return;
   try {
     const res = await fetch(`${API_BASE}/api/posts/${postId}`, {
       method: 'DELETE',
       headers: getAuthHeader()
     });
     if (res.ok) {
-      showToast('Post removed successfully');
+      showToast('Discussion removed');
       loadPosts();
       loadCommunityStats();
+    } else {
+      showToast('Failed to delete discussion');
     }
   } catch (err) {
-    showToast('Failed to delete post');
+    showToast('Error deleting post');
   }
 }
 
-async function loadCommentsForPost(postId, container, countTextEl) {
-  container.innerHTML = '<div class="text-secondary" style="font-size: 13px;">Loading comments...</div>';
+async function loadCommentsForPost(postId, container, countLabelEl) {
+  container.innerHTML = '<div class="text-secondary p-2" style="font-size: 13px;">Loading comments...</div>';
   try {
-    const res = await fetch(`${API_BASE}/api/posts/${postId}/comments`, { headers: getAuthHeader() });
+    const res = await fetch(`${API_BASE}/api/posts/${postId}/comments`);
     const data = await res.json();
-    renderCommentsSection(postId, data.comments || [], container, countTextEl);
+    renderCommentsDrawer(postId, data.comments || [], container, countLabelEl);
   } catch (err) {
-    container.innerHTML = '<div class="text-danger" style="font-size: 13px;">Failed to load comments.</div>';
+    container.innerHTML = '<div class="text-danger p-2" style="font-size: 13px;">Failed to load comments.</div>';
   }
 }
 
-function renderCommentsSection(postId, comments, container, countTextEl) {
+function renderCommentsDrawer(postId, comments, container, countLabelEl) {
   container.innerHTML = '';
 
-  const inputArea = document.createElement('div');
-  inputArea.className = 'd-flex flex-column gap-2';
+  const commentFormCard = document.createElement('div');
+  commentFormCard.className = 'comment-box-card';
+  commentFormCard.innerHTML = `
+    <textarea class="form-control" placeholder="What are your thoughts on this architecture?" rows="2"></textarea>
+    <div class="d-flex justify-content-end gap-2">
+      <button class="btn-open-app py-1 px-3 submit-comment-action" style="font-size: 12px;">Comment</button>
+    </div>
+  `;
 
-  if (currentUser) {
-    inputArea.innerHTML = `
-      <div style="font-size: 12px; color: var(--reddit-meta);">Comment as <strong class="text-dark">u/${escapeHtml(currentUser.username)}</strong></div>
-      <div class="comment-composer">
-        <textarea id="comment-textarea-${postId}" placeholder="What are your thoughts on this architecture?"></textarea>
-        <div class="d-flex justify-content-end">
-          <button class="btn-reddit-solid" id="submit-comment-${postId}" style="font-size: 12px; padding: 4px 14px;">Comment</button>
-        </div>
-      </div>
-    `;
-    container.appendChild(inputArea);
+  const textarea = commentFormCard.querySelector('textarea');
+  const submitBtn = commentFormCard.querySelector('.submit-comment-action');
 
-    const submitBtn = inputArea.querySelector(`#submit-comment-${postId}`);
-    const textarea = inputArea.querySelector(`#comment-textarea-${postId}`);
-    submitBtn.addEventListener('click', async () => {
-      const text = textarea.value.trim();
-      if (!text) return;
-      try {
-        const res = await fetch(`${API_BASE}/api/posts/${postId}/comments`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            ...getAuthHeader()
-          },
-          body: JSON.stringify({ content: text })
-        });
-        if (res.ok) {
-          const resData = await res.json();
-          textarea.value = '';
-          if (countTextEl) countTextEl.textContent = `${resData.comments_count} Comments`;
-          loadCommentsForPost(postId, container, countTextEl);
-          showToast('Comment submitted');
-        }
-      } catch (err) {
+  submitBtn.addEventListener('click', async () => {
+    if (!currentUser) {
+      showAuthModal('login');
+      showToast('Log in to participate in technical discussions');
+      return;
+    }
+    const content = textarea.value.trim();
+    if (!content) return;
+
+    submitBtn.disabled = true;
+    try {
+      const res = await fetch(`${API_BASE}/api/posts/${postId}/comments`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...getAuthHeader()
+        },
+        body: JSON.stringify({ content })
+      });
+      if (res.ok) {
+        textarea.value = '';
+        const listRes = await fetch(`${API_BASE}/api/posts/${postId}/comments`);
+        const listData = await listRes.json();
+        const currentCount = listData.comments.length;
+        if (countLabelEl) countLabelEl.textContent = formatScore(currentCount);
+        renderCommentsDrawer(postId, listData.comments, container, countLabelEl);
+        showToast('Comment submitted');
+      } else {
         showToast('Failed to post comment');
       }
-    });
-  } else {
-    inputArea.innerHTML = `
-      <div class="card p-2 text-center text-secondary" style="font-size: 13px; border: 1px solid var(--reddit-border);">
-        <a href="#" class="comment-login-trigger text-decoration-none fw-bold">Log in</a> or <a href="#" class="comment-signup-trigger text-decoration-none fw-bold">sign up</a> to participate in the discussion.
-      </div>
-    `;
-    container.appendChild(inputArea);
-    inputArea.querySelector('.comment-login-trigger').addEventListener('click', (e) => {
-      e.preventDefault();
-      showAuthModal('login');
-    });
-    inputArea.querySelector('.comment-signup-trigger').addEventListener('click', (e) => {
-      e.preventDefault();
-      showAuthModal('signup');
-    });
-  }
+    } catch (err) {
+      showToast('Error posting comment');
+    } finally {
+      submitBtn.disabled = false;
+    }
+  });
 
-  const listEl = document.createElement('div');
-  listEl.className = 'd-flex flex-column gap-2 mt-2';
+  container.appendChild(commentFormCard);
 
   if (comments.length === 0) {
-    listEl.innerHTML = '<div class="text-secondary py-2" style="font-size: 13px;">No comments yet. Be the first to share an engineering perspective.</div>';
-  } else {
-    comments.forEach(comment => {
-      const item = document.createElement('div');
-      item.className = 'comment-entry-row';
-
-      let deleteBtnHtml = '';
-      if (comment.can_delete) {
-        deleteBtnHtml = `<button class="btn btn-link text-danger p-0 ms-auto text-decoration-none" style="font-size: 11px;" data-delete-comment="${comment.id}">Delete</button>`;
-      }
-
-      item.innerHTML = `
-        <img class="comment-user-avatar" src="${resolveUrl(escapeHtml(comment.author.avatar_url || '/media/avatar1.jpg'))}" alt="Avatar">
-        <div class="comment-main-body">
-          <div class="comment-user-header">
-            <span class="comment-username" data-username="${escapeHtml(comment.author.username)}">u/${escapeHtml(comment.author.username)}</span>
-            <span class="comment-timestamp">${timeAgo(comment.created_at)}</span>
-            ${deleteBtnHtml}
-          </div>
-          <div class="comment-text-content">${escapeHtml(comment.content)}</div>
-        </div>
-      `;
-
-      item.querySelector('.comment-username').addEventListener('click', () => {
-        openUserProfile(comment.author.username);
-      });
-
-      const delBtn = item.querySelector('[data-delete-comment]');
-      if (delBtn) {
-        delBtn.addEventListener('click', async () => {
-          if (!confirm('Delete this comment?')) return;
-          try {
-            const res = await fetch(`${API_BASE}/api/comments/${comment.id}`, {
-              method: 'DELETE',
-              headers: getAuthHeader()
-            });
-            if (res.ok) {
-              const resData = await res.json();
-              if (countTextEl) countTextEl.textContent = `${resData.comments_count} Comments`;
-              loadCommentsForPost(postId, container, countTextEl);
-              showToast('Comment deleted');
-            }
-          } catch (err) {
-            showToast('Failed to delete comment');
-          }
-        });
-      }
-
-      listEl.appendChild(item);
-    });
+    const emptyNotice = document.createElement('div');
+    emptyNotice.className = 'text-secondary p-2 text-center';
+    emptyNotice.style.fontSize = '13px';
+    emptyNotice.textContent = 'No comments yet. Be the first to share your thoughts.';
+    container.appendChild(emptyNotice);
+    return;
   }
 
-  container.appendChild(listEl);
+  comments.forEach(comment => {
+    const single = document.createElement('div');
+    single.className = 'single-comment-card';
+
+    const isCommentAuthor = currentUser && currentUser.id === comment.user.id;
+    let deleteCommentHtml = '';
+    if (isCommentAuthor) {
+      deleteCommentHtml = `
+        <button class="btn btn-link btn-sm text-secondary p-0 border-0 ms-2 delete-comment-btn" data-comment-id="${comment.id}" style="font-size: 11px;">
+          Delete
+        </button>
+      `;
+    }
+
+    single.innerHTML = `
+      <img src="${resolveUrl(comment.user.avatar_url)}" class="comment-avatar-img" alt="Avatar">
+      <div class="comment-right-area">
+        <div class="comment-user-row">
+          <span class="comment-user-name" data-username="${escapeHtml(comment.user.username)}">u/${escapeHtml(comment.user.username)}</span>
+          <span class="text-secondary">•</span>
+          <span class="text-secondary">${timeAgo(comment.created_at)}</span>
+          ${deleteCommentHtml}
+        </div>
+        <div class="comment-message-body">${escapeHtml(comment.content)}</div>
+      </div>
+    `;
+
+    const uLink = single.querySelector('.comment-user-name');
+    if (uLink) {
+      uLink.addEventListener('click', () => openUserProfile(comment.user.username));
+    }
+
+    const delCommentBtn = single.querySelector('.delete-comment-btn');
+    if (delCommentBtn) {
+      delCommentBtn.addEventListener('click', async () => {
+        if (!confirm('Delete this comment?')) return;
+        try {
+          const res = await fetch(`${API_BASE}/api/comments/${comment.id}`, {
+            method: 'DELETE',
+            headers: getAuthHeader()
+          });
+          if (res.ok) {
+            loadCommentsForPost(postId, container, countLabelEl);
+            showToast('Comment deleted');
+          }
+        } catch (err) {
+          showToast('Error deleting comment');
+        }
+      });
+    }
+
+    container.appendChild(single);
+  });
 }
 
 function showAuthModal(mode) {
   authError.classList.add('d-none');
   authError.textContent = '';
-  authForm.reset();
   if (mode === 'signup') {
+    tabSignupBtn.classList.add('border-primary', 'active');
+    tabLoginBtn.classList.remove('border-primary', 'active');
     authModalTitle.textContent = 'Sign Up';
-    tabSignupBtn.classList.add('active', 'border-primary');
-    tabLoginBtn.classList.remove('active', 'border-primary');
     displayNameGroup.classList.remove('d-none');
     displayNameGroup.classList.add('d-flex');
     bioGroup.classList.remove('d-none');
     bioGroup.classList.add('d-flex');
     authSubmitBtn.textContent = 'Sign Up';
   } else {
+    tabLoginBtn.classList.add('border-primary', 'active');
+    tabSignupBtn.classList.remove('border-primary', 'active');
     authModalTitle.textContent = 'Log In';
-    tabLoginBtn.classList.add('active', 'border-primary');
-    tabSignupBtn.classList.remove('active', 'border-primary');
     displayNameGroup.classList.add('d-none');
     displayNameGroup.classList.remove('d-flex');
     bioGroup.classList.add('d-none');
@@ -713,24 +749,22 @@ function showAuthModal(mode) {
   if (bsAuthModal) bsAuthModal.show();
 }
 
+tabLoginBtn.addEventListener('click', () => showAuthModal('login'));
+tabSignupBtn.addEventListener('click', () => showAuthModal('signup'));
 openLoginBtn.addEventListener('click', () => showAuthModal('login'));
-openSignupBtn.addEventListener('click', () => showAuthModal('signup'));
-
-tabLoginBtn.addEventListener('click', (e) => {
-  e.preventDefault();
-  showAuthModal('login');
-});
-
-tabSignupBtn.addEventListener('click', (e) => {
-  e.preventDefault();
-  showAuthModal('signup');
+openAppActionBtn.addEventListener('click', () => {
+  if (currentUser) {
+    openCreatePostModal();
+  } else {
+    showAuthModal('signup');
+  }
 });
 
 authForm.addEventListener('submit', async (e) => {
   e.preventDefault();
   authError.classList.add('d-none');
   const isSignup = tabSignupBtn.classList.contains('active');
-  const endpoint = isSignup ? `${API_BASE}/api/auth/register` : `${API_BASE}/api/auth/login`;
+  const endpoint = isSignup ? '/api/auth/register' : '/api/auth/login';
 
   const payload = {
     username: authUsername.value.trim(),
@@ -738,92 +772,111 @@ authForm.addEventListener('submit', async (e) => {
   };
 
   if (isSignup) {
-    const disp = authDisplayName.value.trim();
-    payload.display_name = disp || authUsername.value.trim();
+    payload.display_name = authDisplayName.value.trim();
     payload.bio = authBio.value.trim();
   }
 
   try {
-    const res = await fetch(endpoint, {
+    const res = await fetch(`${API_BASE}${endpoint}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     });
     const data = await res.json();
-    if (res.ok) {
-      localStorage.setItem('auth_token', data.token);
-      if (bsAuthModal) bsAuthModal.hide();
-      await fetchMe();
-      loadPosts();
-      loadDemoUsers();
-      loadCommunityStats();
-      showToast(isSignup ? 'Welcome to INCREDIBLE_x_TECH' : 'Logged in successfully');
-    } else {
+    if (!res.ok) {
       authError.textContent = data.error || 'Authentication failed';
       authError.classList.remove('d-none');
+      return;
     }
+
+    localStorage.setItem('auth_token', data.token);
+    currentUser = data.user;
+    updateAuthUI();
+    if (bsAuthModal) bsAuthModal.hide();
+    authForm.reset();
+    showToast(isSignup ? `Welcome to INCREDIBLE_x_TECH, u/${currentUser.username}!` : `Logged in as u/${currentUser.username}`);
+    loadPosts();
+    loadCommunityStats();
   } catch (err) {
-    authError.textContent = 'Unable to connect to the server. Please verify backend is running on port 3000.';
+    authError.textContent = 'Network or server error. Please try again.';
     authError.classList.remove('d-none');
   }
 });
 
-function handleLogout() {
-  fetch(`${API_BASE}/api/auth/logout`, { method: 'POST', headers: getAuthHeader() }).catch(() => {});
+navProfilePill.addEventListener('click', (e) => {
+  e.stopPropagation();
+  userMenuFlyout.classList.toggle('d-none');
+});
+
+document.addEventListener('click', () => {
+  userMenuFlyout.classList.add('d-none');
+});
+
+menuItemProfile.addEventListener('click', () => {
+  if (currentUser) {
+    openUserProfile(currentUser.username);
+  }
+});
+
+menuItemLogout.addEventListener('click', async () => {
+  try {
+    await fetch(`${API_BASE}/api/auth/logout`, {
+      method: 'POST',
+      headers: getAuthHeader()
+    });
+  } catch (err) {}
   localStorage.removeItem('auth_token');
   currentUser = null;
-  userMenuFlyout.classList.add('d-none');
   updateAuthUI();
-  loadPosts();
   showToast('Logged out');
-}
+  loadPosts();
+});
 
-logoutBtn.addEventListener('click', handleLogout);
-menuItemLogout.addEventListener('click', handleLogout);
-
-function openCreateModal() {
+function openCreatePostModal() {
   if (!currentUser) {
     showAuthModal('login');
-    showToast('Log in to create an engineering discussion');
+    showToast('Log in to create discussions');
     return;
   }
-  createPostForm.reset();
   postError.classList.add('d-none');
+  createPostForm.reset();
   selectedMediaUrl = '';
   imageSelectedPreview.textContent = '';
-  document.querySelectorAll('.media-picker-item').forEach(d => d.classList.remove('selected'));
+  document.querySelectorAll('.media-picker-item').forEach(el => el.classList.remove('selected'));
   if (bsCreatePostModal) bsCreatePostModal.show();
 }
 
-feedCreateTrigger.addEventListener('click', openCreateModal);
-quickImageBtn.addEventListener('click', openCreateModal);
-quickLinkBtn.addEventListener('click', openCreateModal);
-navbarCreateBtn.addEventListener('click', openCreateModal);
-sidebarCreateBtn.addEventListener('click', openCreateModal);
+feedCreateTrigger.addEventListener('click', openCreatePostModal);
+quickImageBtn.addEventListener('click', (e) => {
+  e.stopPropagation();
+  openCreatePostModal();
+});
+navbarCreateBtn.addEventListener('click', openCreatePostModal);
+sidebarCreateBtn.addEventListener('click', openCreatePostModal);
 
 clearImageBtn.addEventListener('click', () => {
   selectedMediaUrl = '';
   postImageFile.value = '';
   imageSelectedPreview.textContent = '';
-  document.querySelectorAll('.media-picker-item').forEach(d => d.classList.remove('selected'));
+  document.querySelectorAll('.media-picker-item').forEach(el => el.classList.remove('selected'));
 });
 
 postImageFile.addEventListener('change', () => {
   if (postImageFile.files.length > 0) {
     selectedMediaUrl = '';
-    document.querySelectorAll('.media-picker-item').forEach(d => d.classList.remove('selected'));
-    imageSelectedPreview.textContent = `Custom file selected: ${postImageFile.files[0].name}`;
+    document.querySelectorAll('.media-picker-item').forEach(el => el.classList.remove('selected'));
+    imageSelectedPreview.textContent = `Upload: ${postImageFile.files[0].name}`;
   }
 });
 
 createPostForm.addEventListener('submit', async (e) => {
   e.preventDefault();
   postError.classList.add('d-none');
+
   const title = postTitleInput.value.trim();
   const content = postContentInput.value.trim();
-
   if (!title || !content) {
-    postError.textContent = 'Title and body text are required';
+    postError.textContent = 'Title and content are required';
     postError.classList.remove('d-none');
     return;
   }
@@ -834,20 +887,17 @@ createPostForm.addEventListener('submit', async (e) => {
     const formData = new FormData();
     formData.append('image', postImageFile.files[0]);
     try {
-      const upRes = await fetch(`${API_BASE}/api/upload`, {
+      const uploadRes = await fetch(`${API_BASE}/api/upload`, {
         method: 'POST',
         headers: getAuthHeader(),
         body: formData
       });
-      const upData = await upRes.json();
-      if (!upRes.ok) {
-        postError.textContent = upData.error || 'Failed to upload image file';
-        postError.classList.remove('d-none');
-        return;
+      if (uploadRes.ok) {
+        const uploadData = await uploadRes.json();
+        finalImageUrl = uploadData.url;
       }
-      finalImageUrl = upData.url;
     } catch (err) {
-      postError.textContent = 'Upload failed';
+      postError.textContent = 'Failed to upload custom image';
       postError.classList.remove('d-none');
       return;
     }
@@ -867,20 +917,19 @@ createPostForm.addEventListener('submit', async (e) => {
       })
     });
     const data = await res.json();
-    if (res.ok) {
-      if (bsCreatePostModal) bsCreatePostModal.hide();
-      currentSort = 'new';
-      updateSortButtons();
-      loadPosts();
-      loadCommunityStats();
-      fetchMe();
-      showToast('Discussion published to r/INCREDIBLE_x_TECH');
-    } else {
+    if (!res.ok) {
       postError.textContent = data.error || 'Failed to publish post';
       postError.classList.remove('d-none');
+      return;
     }
+
+    if (bsCreatePostModal) bsCreatePostModal.hide();
+    createPostForm.reset();
+    showToast('Post published successfully');
+    loadPosts();
+    loadCommunityStats();
   } catch (err) {
-    postError.textContent = 'Network error while creating post';
+    postError.textContent = 'Server error while creating post';
     postError.classList.remove('d-none');
   }
 });
@@ -889,80 +938,88 @@ async function openUserProfile(username) {
   currentProfileUsername = username;
   currentProfileTab = 'posts';
   profileEditSection.classList.add('d-none');
-  userMenuFlyout.classList.add('d-none');
-  if (bsProfileModal) bsProfileModal.show();
-  await refreshProfileView();
-}
 
-async function refreshProfileView() {
-  if (!currentProfileUsername) return;
-  profileTabContent.innerHTML = '<div class="text-secondary p-3 text-center" style="font-size: 13px;">Loading profile data...</div>';
   try {
-    const res = await fetch(`${API_BASE}/api/users/${currentProfileUsername}`, { headers: getAuthHeader() });
+    const res = await fetch(`${API_BASE}/api/users/${username}`, { headers: getAuthHeader() });
     if (!res.ok) {
-      profileTabContent.innerHTML = '<div class="card p-3 text-center text-secondary">User not found</div>';
+      showToast('User not found');
       return;
     }
     const data = await res.json();
     const user = data.user;
 
-    profileModalTitle.textContent = `u/${user.username}'s Profile`;
-    profileViewAvatar.src = resolveUrl(user.avatar_url || '/media/avatar1.jpg');
     profileViewDisplayName.textContent = user.display_name;
     profileViewUsername.textContent = `u/${user.username}`;
-    profileViewBio.textContent = user.bio || 'Technical engineer on r/INCREDIBLE_x_TECH.';
+    profileViewBio.textContent = user.bio || 'Architect and developer.';
+    profileViewAvatar.src = resolveUrl(user.avatar_url);
     profileFollowersNum.textContent = user.followers_count;
     profileFollowingNum.textContent = user.following_count;
     profilePostsNum.textContent = user.posts_count;
     profileKarmaNum.textContent = user.karma;
 
-    const isOwn = currentUser && currentUser.id === user.id;
-
-    if (isOwn) {
+    const isOwnProfile = currentUser && currentUser.username === user.username;
+    if (isOwnProfile) {
       profileFollowToggleBtn.classList.add('d-none');
       profileEditToggleBtn.classList.remove('d-none');
     } else {
       profileEditToggleBtn.classList.add('d-none');
-      profileFollowToggleBtn.classList.remove('d-none');
-      if (user.is_following) {
-        profileFollowToggleBtn.textContent = 'Following';
-        profileFollowToggleBtn.className = 'btn-reddit-bordered py-1 px-3';
+      if (currentUser) {
+        profileFollowToggleBtn.classList.remove('d-none');
+        if (user.is_following) {
+          profileFollowToggleBtn.textContent = 'Following';
+        } else {
+          profileFollowToggleBtn.textContent = 'Follow';
+        }
       } else {
+        profileFollowToggleBtn.classList.remove('d-none');
         profileFollowToggleBtn.textContent = 'Follow';
-        profileFollowToggleBtn.className = 'btn-reddit-solid py-1 px-3';
       }
-      profileFollowToggleBtn.onclick = async () => {
-        if (!currentUser) {
-          showAuthModal('login');
-          return;
-        }
-        const followRes = await fetch(`${API_BASE}/api/users/${user.id}/follow`, {
-          method: 'POST',
-          headers: getAuthHeader()
-        });
-        if (followRes.ok) {
-          await refreshProfileView();
-          await fetchMe();
-        }
-      };
     }
 
-    editDisplayNameInput.value = user.display_name;
-    editBioInput.value = user.bio || '';
-    editAvatarSelect.value = user.avatar_url || '/media/avatar1.jpg';
-
     updateProfileTabButtons();
-    loadProfileTabContent(user);
+    loadProfileTabContent();
+
+    if (bsProfileModal) bsProfileModal.show();
   } catch (err) {
-    profileTabContent.innerHTML = '<div class="card p-3 text-center text-danger">Error loading profile data.</div>';
+    showToast('Error loading profile');
   }
 }
 
+sidebarViewProfileBtn.addEventListener('click', () => {
+  if (currentUser) {
+    openUserProfile(currentUser.username);
+  }
+});
+
+profileFollowToggleBtn.addEventListener('click', async () => {
+  if (!currentUser) {
+    showAuthModal('login');
+    return;
+  }
+  try {
+    const userRes = await fetch(`${API_BASE}/api/users/${currentProfileUsername}`);
+    const userData = await userRes.json();
+    const res = await fetch(`${API_BASE}/api/users/${userData.user.id}/follow`, {
+      method: 'POST',
+      headers: getAuthHeader()
+    });
+    if (res.ok) {
+      const data = await res.json();
+      profileFollowToggleBtn.textContent = data.is_following ? 'Following' : 'Follow';
+      profileFollowersNum.textContent = data.followers_count;
+      fetchMe();
+    }
+  } catch (err) {
+    showToast('Failed to update follow');
+  }
+});
+
 profileEditToggleBtn.addEventListener('click', () => {
-  if (profileEditSection.classList.contains('d-none')) {
-    profileEditSection.classList.remove('d-none');
-  } else {
-    profileEditSection.classList.add('d-none');
+  profileEditSection.classList.toggle('d-none');
+  if (!profileEditSection.classList.contains('d-none') && currentUser) {
+    editDisplayNameInput.value = currentUser.display_name;
+    editBioInput.value = currentUser.bio || '';
+    editAvatarSelect.value = currentUser.avatar_url || '/media/avatar1.jpg';
   }
 });
 
@@ -980,27 +1037,26 @@ profileEditForm.addEventListener('submit', async (e) => {
         ...getAuthHeader()
       },
       body: JSON.stringify({
-        display_name: editDisplayNameInput.value,
-        bio: editBioInput.value,
+        display_name: editDisplayNameInput.value.trim(),
+        bio: editBioInput.value.trim(),
         avatar_url: editAvatarSelect.value
       })
     });
     if (res.ok) {
       profileEditSection.classList.add('d-none');
       await fetchMe();
-      await refreshProfileView();
-      loadPosts();
+      openUserProfile(currentUser.username);
       showToast('Profile updated');
     }
   } catch (err) {
-    showToast('Failed to update profile');
+    showToast('Failed to save profile changes');
   }
 });
 
 function updateProfileTabButtons() {
-  pTabPosts.classList.remove('active', 'border-primary');
-  pTabFollowers.classList.remove('active', 'border-primary');
-  pTabFollowing.classList.remove('active', 'border-primary');
+  [pTabPosts, pTabFollowers, pTabFollowing].forEach(btn => {
+    btn.classList.remove('active', 'border-primary');
+  });
   if (currentProfileTab === 'posts') pTabPosts.classList.add('active', 'border-primary');
   if (currentProfileTab === 'followers') pTabFollowers.classList.add('active', 'border-primary');
   if (currentProfileTab === 'following') pTabFollowing.classList.add('active', 'border-primary');
@@ -1009,104 +1065,93 @@ function updateProfileTabButtons() {
 pTabPosts.addEventListener('click', () => {
   currentProfileTab = 'posts';
   updateProfileTabButtons();
-  refreshProfileView();
+  loadProfileTabContent();
 });
-
 pTabFollowers.addEventListener('click', () => {
   currentProfileTab = 'followers';
   updateProfileTabButtons();
-  refreshProfileView();
+  loadProfileTabContent();
 });
-
 pTabFollowing.addEventListener('click', () => {
   currentProfileTab = 'following';
   updateProfileTabButtons();
-  refreshProfileView();
+  loadProfileTabContent();
 });
 
-async function loadProfileTabContent(targetUser) {
-  profileTabContent.innerHTML = '<div class="text-secondary p-3 text-center" style="font-size: 13px;">Loading data...</div>';
+async function loadProfileTabContent() {
+  profileTabContent.innerHTML = '<div class="text-secondary p-3 text-center">Loading...</div>';
   if (currentProfileTab === 'posts') {
     try {
-      const res = await fetch(`${API_BASE}/api/posts?author=${targetUser.username}&sort=new`, { headers: getAuthHeader() });
+      const res = await fetch(`${API_BASE}/api/posts?author=${encodeURIComponent(currentProfileUsername)}`, {
+        headers: getAuthHeader()
+      });
       const data = await res.json();
-      const posts = data.posts || [];
-      if (posts.length === 0) {
-        profileTabContent.innerHTML = '<div class="card p-3 text-center text-secondary">No technical posts submitted by this user yet.</div>';
+      const userPosts = data.posts || [];
+      if (userPosts.length === 0) {
+        profileTabContent.innerHTML = '<div class="text-secondary p-3 text-center">No discussions created yet.</div>';
         return;
       }
       profileTabContent.innerHTML = '';
-      posts.forEach(post => {
+      userPosts.forEach(p => {
         const item = document.createElement('div');
-        item.className = 'reddit-post-card mb-2';
+        item.className = 'card p-2';
+        item.style.border = '1px solid #CCCCCC';
+        item.style.borderRadius = '8px';
         item.innerHTML = `
-          <div class="vote-rail">
-            <span class="vote-tally">${post.score}</span>
-          </div>
-          <div class="post-content-container">
-            <div class="post-top-meta">
-              <span>Posted ${timeAgo(post.created_at)}</span>
-              <span>•</span>
-              <span>${post.comments_count} comments</span>
-            </div>
-            <h5 class="post-headline" style="font-size: 15px;">${escapeHtml(post.title)}</h5>
-            <div class="post-body-text" style="font-size: 13px;">${escapeHtml(post.content)}</div>
-          </div>
+          <div class="fw-bold" style="font-size: 14px;">${escapeHtml(p.title)}</div>
+          <div class="text-secondary" style="font-size: 12px;">${formatScore(p.score)} votes • ${p.comments_count} comments • ${timeAgo(p.created_at)}</div>
         `;
         profileTabContent.appendChild(item);
       });
     } catch (err) {
-      profileTabContent.innerHTML = '<div class="card p-3 text-center text-danger">Failed to load posts</div>';
+      profileTabContent.innerHTML = '<div class="text-danger p-3 text-center">Failed to load posts.</div>';
     }
   } else if (currentProfileTab === 'followers') {
     try {
-      const res = await fetch(`${API_BASE}/api/users/${targetUser.username}/followers`, { headers: getAuthHeader() });
+      const res = await fetch(`${API_BASE}/api/users/${encodeURIComponent(currentProfileUsername)}/followers`, {
+        headers: getAuthHeader()
+      });
       const data = await res.json();
-      renderUserList(data.followers || [], 'No followers yet.');
+      renderUserList(data.followers || []);
     } catch (err) {
-      profileTabContent.innerHTML = '<div class="card p-3 text-center text-danger">Failed to load followers</div>';
+      profileTabContent.innerHTML = '<div class="text-danger p-3 text-center">Failed to load followers.</div>';
     }
   } else if (currentProfileTab === 'following') {
     try {
-      const res = await fetch(`${API_BASE}/api/users/${targetUser.username}/following`, { headers: getAuthHeader() });
+      const res = await fetch(`${API_BASE}/api/users/${encodeURIComponent(currentProfileUsername)}/following`, {
+        headers: getAuthHeader()
+      });
       const data = await res.json();
-      renderUserList(data.following || [], 'Not following any users yet.');
+      renderUserList(data.following || []);
     } catch (err) {
-      profileTabContent.innerHTML = '<div class="card p-3 text-center text-danger">Failed to load following list</div>';
+      profileTabContent.innerHTML = '<div class="text-danger p-3 text-center">Failed to load following.</div>';
     }
   }
 }
 
-function renderUserList(users, emptyMessage) {
+function renderUserList(users) {
   if (users.length === 0) {
-    profileTabContent.innerHTML = `<div class="card p-3 text-center text-secondary">${escapeHtml(emptyMessage)}</div>`;
+    profileTabContent.innerHTML = '<div class="text-secondary p-3 text-center">None found.</div>';
     return;
   }
   profileTabContent.innerHTML = '';
   users.forEach(u => {
     const row = document.createElement('div');
     row.className = 'user-item-row';
-
-    let followBtnHtml = '';
-    const isOwn = currentUser && currentUser.id === u.id;
-    if (currentUser && !isOwn) {
-      followBtnHtml = `
-        <button class="btn btn-sm ${u.is_following ? 'btn-light border' : 'btn-reddit-solid'} py-1 px-3 fw-bold follow-action-btn" style="font-size: 11px; border-radius: 20px;" data-uid="${u.id}">
-          ${u.is_following ? 'Following' : 'Follow'}
-        </button>
-      `;
-    }
-
     row.innerHTML = `
-      <div class="user-item-info" data-view-username="${escapeHtml(u.username)}">
-        <img class="user-item-avatar" src="${resolveUrl(escapeHtml(u.avatar_url || '/media/avatar1.jpg'))}" alt="Avatar">
+      <div class="user-item-info">
+        <img class="user-item-avatar" src="${resolveUrl(u.avatar_url)}" alt="Avatar">
         <div class="user-item-names">
           <span class="user-item-disp">${escapeHtml(u.display_name)}</span>
           <span class="user-item-user">u/${escapeHtml(u.username)}</span>
         </div>
       </div>
       <div>
-        ${followBtnHtml}
+        ${(currentUser && currentUser.username !== u.username) ? `
+          <button class="btn-open-app py-1 px-3 list-follow-btn" data-uid="${u.id}" style="font-size: 12px;">
+            ${u.is_following ? 'Following' : 'Follow'}
+          </button>
+        ` : ''}
       </div>
     `;
 
@@ -1114,21 +1159,21 @@ function renderUserList(users, emptyMessage) {
       openUserProfile(u.username);
     });
 
-    const fBtn = row.querySelector('.follow-action-btn');
+    const fBtn = row.querySelector('.list-follow-btn');
     if (fBtn) {
-      fBtn.addEventListener('click', async () => {
+      fBtn.addEventListener('click', async (e) => {
+        e.stopPropagation();
         try {
           const res = await fetch(`${API_BASE}/api/users/${u.id}/follow`, {
             method: 'POST',
             headers: getAuthHeader()
           });
           if (res.ok) {
-            await refreshProfileView();
-            await fetchMe();
+            const data = await res.json();
+            fBtn.textContent = data.is_following ? 'Following' : 'Follow';
+            fetchMe();
           }
-        } catch (err) {
-          showToast('Action failed');
-        }
+        } catch (err) {}
       });
     }
 
@@ -1136,156 +1181,50 @@ function renderUserList(users, emptyMessage) {
   });
 }
 
-navProfilePill.addEventListener('click', (e) => {
-  e.stopPropagation();
-  userMenuFlyout.classList.toggle('d-none');
-});
+const sortOptions = ['best', 'hot', 'new', 'top'];
+let sortIndex = 0;
 
-menuItemProfile.addEventListener('click', () => {
-  userMenuFlyout.classList.add('d-none');
-  if (currentUser) openUserProfile(currentUser.username);
-});
-
-menuItemSettings.addEventListener('click', () => {
-  userMenuFlyout.classList.add('d-none');
-  if (currentUser) {
-    openUserProfile(currentUser.username);
-    profileEditSection.classList.remove('d-none');
-  }
-});
-
-sidebarViewProfileBtn.addEventListener('click', () => {
-  if (currentUser) openUserProfile(currentUser.username);
-});
-
-navDiscoverBtn.addEventListener('click', () => {
-  currentSort = 'hot';
-  updateSortButtons();
-  loadPosts();
-  showToast('Filtered to trending technical discussions');
-});
-
-navChatBtn.addEventListener('click', () => {
-  showToast('Chat channels: #distributed-systems, #kernel-dev, #gpu-compute');
-});
-
-navBellBtn.addEventListener('click', () => {
-  showToast('Notifications: 3 new technical responses on your benchmarks');
-});
-
-headerBellBtn.addEventListener('click', () => {
-  showToast('Community notifications enabled for r/INCREDIBLE_x_TECH');
-});
-
-headerJoinBtn.addEventListener('click', () => {
-  if (headerJoinBtn.classList.contains('joined')) {
-    headerJoinBtn.classList.remove('joined');
-    headerJoinBtn.textContent = 'Join';
-    showToast('Left r/INCREDIBLE_x_TECH');
-  } else {
-    headerJoinBtn.classList.add('joined');
-    headerJoinBtn.textContent = 'Joined';
-    showToast('Joined r/INCREDIBLE_x_TECH');
-  }
-});
-
-subtabPosts.addEventListener('click', (e) => {
-  e.preventDefault();
-  subtabPosts.classList.add('active');
-  subtabRules.classList.remove('active');
-  subtabWiki.classList.remove('active');
-  subtabGuidelines.classList.remove('active');
-  subtabFaq.classList.remove('active');
-  currentSort = 'hot';
-  updateSortButtons();
+sortDropdownTrigger.addEventListener('click', () => {
+  sortIndex = (sortIndex + 1) % sortOptions.length;
+  currentSort = sortOptions[sortIndex];
+  const cap = currentSort.charAt(0).toUpperCase() + currentSort.slice(1);
+  currentSortLabel.textContent = cap;
+  showToast(`Sorting by ${cap}`);
   loadPosts();
 });
 
-subtabRules.addEventListener('click', (e) => {
-  e.preventDefault();
-  subtabPosts.classList.remove('active');
-  subtabRules.classList.add('active');
-  subtabWiki.classList.remove('active');
-  subtabGuidelines.classList.remove('active');
-  subtabFaq.classList.remove('active');
-  showToast('Displaying community moderation standards');
+filterRegionBtn.addEventListener('click', () => {
+  showToast('Viewing discussions from Everywhere');
 });
 
-subtabWiki.addEventListener('click', (e) => {
-  e.preventDefault();
-  showToast('Wiki: Production Systems Architecture & Distributed Systems');
+filterViewModeBtn.addEventListener('click', () => {
+  currentViewMode = currentViewMode === 'card' ? 'compact' : 'card';
+  showToast(`View switched to ${currentViewMode} mode`);
 });
 
-subtabGuidelines.addEventListener('click', (e) => {
-  e.preventDefault();
-  showToast('Guidelines: Reproducible benchmarks, memory alignment, and zero-allocation');
+navHamburgerBtn.addEventListener('click', () => {
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  showToast('INCREDIBLE_x_TECH Navigation Menu');
 });
 
-subtabFaq.addEventListener('click', (e) => {
-  e.preventDefault();
-  showToast('FAQ: Technical discussions, verification procedures, and citations');
-});
-
-loadMorePostsBtn.addEventListener('click', () => {
-  showToast('All 15 production discussions loaded in full feed');
-  window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-});
-
-document.querySelectorAll('[data-username]').forEach(el => {
-  el.addEventListener('click', (e) => {
-    e.preventDefault();
-    openUserProfile(el.getAttribute('data-username'));
-  });
-});
-
-function updateSortButtons() {
-  sortHotBtn.classList.remove('active');
-  sortNewBtn.classList.remove('active');
-  sortTopBtn.classList.remove('active');
-  if (currentSort === 'hot') {
-    sortHotBtn.classList.add('active');
-  }
-  if (currentSort === 'new') {
-    sortNewBtn.classList.add('active');
-  }
-  if (currentSort === 'top') {
-    sortTopBtn.classList.add('active');
-  }
-}
-
-sortHotBtn.addEventListener('click', () => {
-  currentSort = 'hot';
-  updateSortButtons();
-  loadPosts();
-});
-
-sortNewBtn.addEventListener('click', () => {
-  currentSort = 'new';
-  updateSortButtons();
-  loadPosts();
-});
-
-sortTopBtn.addEventListener('click', () => {
-  currentSort = 'top';
-  updateSortButtons();
-  loadPosts();
-});
-
-let searchDebounce = null;
-searchInput.addEventListener('input', (e) => {
-  if (searchDebounce) clearTimeout(searchDebounce);
-  searchDebounce = setTimeout(() => {
-    currentSearch = e.target.value.trim();
-    loadPosts();
-  }, 250);
+headerMoreBtn.addEventListener('click', () => {
+  if (bsTosModal) bsTosModal.show();
 });
 
 brandLogoBtn.addEventListener('click', () => {
-  currentSort = 'hot';
-  currentSearch = '';
   searchInput.value = '';
-  updateSortButtons();
+  currentSearch = '';
   loadPosts();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+
+let searchDebounce = null;
+searchInput.addEventListener('input', () => {
+  clearTimeout(searchDebounce);
+  searchDebounce = setTimeout(() => {
+    currentSearch = searchInput.value.trim();
+    loadPosts();
+  }, 250);
 });
 
 linkUserAgreement.addEventListener('click', (e) => {
@@ -1303,21 +1242,11 @@ linkContentPolicy.addEventListener('click', (e) => {
   if (bsTosModal) bsTosModal.show();
 });
 
-window.addEventListener('click', (e) => {
-  if (userMenuFlyout && !userMenuFlyout.classList.contains('d-none')) {
-    if (!navProfilePill.contains(e.target)) {
-      userMenuFlyout.classList.add('d-none');
-    }
-  }
-});
-
-async function initApp() {
+window.addEventListener('DOMContentLoaded', async () => {
   initBootstrapComponents();
   await fetchMe();
   await loadDemoUsers();
   await loadCommunityStats();
   await loadFreeMedia();
   await loadPosts();
-}
-
-document.addEventListener('DOMContentLoaded', initApp);
+});

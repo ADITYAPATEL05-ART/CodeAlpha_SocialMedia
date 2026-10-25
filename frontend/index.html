@@ -3,288 +3,213 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>INCREDIBLE_x_TECH - The Tech Community Platform</title>
+  <title>INCREDIBLE_x_TECH - Reddit Style Tech Community</title>
   <link rel="stylesheet" href="/bootstrap.min.css">
   <link rel="stylesheet" href="/style.css">
 </head>
 <body>
 
-  <header class="reddit-top-nav">
-    <div class="d-flex align-items-center gap-2">
-      <div class="reddit-logo-link" id="brandLogoBtn">
-        <div class="reddit-alien-icon">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="#FFFFFF">
+  <header class="reddit-top-header">
+    <div class="reddit-primary-nav">
+      <div class="nav-left-cluster">
+        <button class="hamburger-btn" id="navHamburgerBtn" title="Menu" aria-label="Menu">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+          </svg>
+        </button>
+        <div class="reddit-brand-wordmark" id="brandLogoBtn">
+          <div class="brand-snoo-small">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="#FFFFFF">
+              <path d="M12 2a1 1 0 0 1 1 1v1.07A8.002 8.002 0 0 1 20 12a7.97 7.97 0 0 1-1.3 4.36l1.24 1.25a1 1 0 0 1-1.42 1.41l-1.29-1.29A7.953 7.953 0 0 1 12 20a7.953 7.953 0 0 1-5.23-2.27l-1.29 1.29a1 1 0 0 1-1.42-1.41l1.24-1.25A7.97 7.97 0 0 1 4 12a8.002 8.002 0 0 1 7-7.93V3a1 1 0 0 1 1-1zm0 4a6 6 0 1 0 0 12 6 6 0 0 0 0-12zm-3 5a1.25 1.25 0 1 1 0 2.5 1.25 1.25 0 0 1 0-2.5zm6 0a1.25 1.25 0 1 1 0 2.5 1.25 1.25 0 0 1 0-2.5zm-5 4a3.99 3.99 0 0 0 4 0 1 1 0 1 1 1 1.73 5.99 5.99 0 0 1-6 0 1 1 0 1 1 1-1.73z"/>
+            </svg>
+          </div>
+          <span class="brand-reddit-text">INCREDIBLE_x_TECH</span>
+        </div>
+      </div>
+
+      <div class="nav-right-cluster" id="navAuthArea">
+        <select id="quickDemoSelect" class="form-select form-select-sm d-none d-lg-inline-block" style="width: auto; border-radius: 20px; font-size: 12px;">
+          <option value="">Switch Demo Account</option>
+        </select>
+
+        <div id="loggedOutButtons" class="d-flex align-items-center gap-2">
+          <button class="btn-open-app" id="openAppActionBtn">Open App</button>
+          <button class="btn-login-pill" id="openLoginBtn">Log In</button>
+        </div>
+
+        <div id="loggedInArea" class="d-none align-items-center gap-2">
+          <button class="btn-open-app" id="navbarCreateBtn">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
+              <path d="M8 2a.75.75 0 0 1 .75.75v4.5h4.5a.75.75 0 0 1 0 1.5h-4.5v4.5a.75.75 0 0 1-1.5 0v-4.5h-4.5a.75.75 0 0 1 0-1.5h4.5v-4.5A.75.75 0 0 1 8 2z"/>
+            </svg>
+            Create
+          </button>
+
+          <div class="user-account-dropdown" id="navProfilePill" role="button">
+            <div class="account-avatar-wrapper">
+              <img class="account-avatar" id="navUserAvatar" src="/media/avatar1.jpg" alt="User">
+              <div class="online-dot"></div>
+            </div>
+            <div class="account-names d-none d-sm-flex">
+              <span class="account-handle" id="navUserName">User</span>
+            </div>
+            <svg width="12" height="12" viewBox="0 0 20 20" fill="#787C7E">
+              <path d="M5 7l5 5 5-5z"/>
+            </svg>
+
+            <div class="reddit-user-menu-flyout d-none" id="userMenuFlyout">
+              <button class="reddit-user-menu-item" id="menuItemProfile">
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4zm-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h10z"/></svg>
+                View Profile
+              </button>
+              <div class="reddit-menu-divider"></div>
+              <button class="reddit-user-menu-item" id="menuItemLogout">
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path fill-rule="evenodd" d="M10 12.5a.5.5 0 0 1-.5.5h-8a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5h8a.5.5 0 0 1 .5.5v2a.5.5 0 0 0 1 0v-2A1.5 1.5 0 0 0 9.5 2h-8A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h8a1.5 1.5 0 0 0 1.5-1.5v-2a.5.5 0 0 0-1 0v2z"/><path fill-rule="evenodd" d="M15.854 8.354a.5.5 0 0 0 0-.708l-3-3a.5.5 0 0 0-.708.708L14.293 7.5H5.5a.5.5 0 0 0 0 1h8.793l-2.147 2.146a.5.5 0 0 0 .708.708l3-3z"/></svg>
+                Log Out
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <button class="header-dots-btn" id="headerMoreBtn" title="More options" aria-label="More options">···</button>
+      </div>
+    </div>
+
+    <div class="reddit-search-strip">
+      <div class="reddit-full-search-pill">
+        <div class="search-pill-snoo">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="#FFFFFF">
             <path d="M12 2a1 1 0 0 1 1 1v1.07A8.002 8.002 0 0 1 20 12a7.97 7.97 0 0 1-1.3 4.36l1.24 1.25a1 1 0 0 1-1.42 1.41l-1.29-1.29A7.953 7.953 0 0 1 12 20a7.953 7.953 0 0 1-5.23-2.27l-1.29 1.29a1 1 0 0 1-1.42-1.41l1.24-1.25A7.97 7.97 0 0 1 4 12a8.002 8.002 0 0 1 7-7.93V3a1 1 0 0 1 1-1zm0 4a6 6 0 1 0 0 12 6 6 0 0 0 0-12zm-3 5a1.25 1.25 0 1 1 0 2.5 1.25 1.25 0 0 1 0-2.5zm6 0a1.25 1.25 0 1 1 0 2.5 1.25 1.25 0 0 1 0-2.5zm-5 4a3.99 3.99 0 0 0 4 0 1 1 0 1 1 1 1.73 5.99 5.99 0 0 1-6 0 1 1 0 1 1 1-1.73z"/>
           </svg>
         </div>
-        <span class="reddit-wordmark">INCREDIBLE_x_TECH</span>
-      </div>
-
-      <div class="reddit-community-pill d-none d-md-flex">
-        <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor">
-          <path d="M10 2L2 9h3v9h10V9h3L10 2z"/>
-        </svg>
-        <span>r/INCREDIBLE_x_TECH</span>
-        <svg width="12" height="12" viewBox="0 0 20 20" fill="currentColor">
-          <path d="M5 7l5 5 5-5z"/>
-        </svg>
+        <input type="text" id="searchInput" placeholder="Search Reddit">
       </div>
     </div>
 
-    <div class="reddit-search-container">
-      <div class="reddit-search-box">
-        <svg width="16" height="16" viewBox="0 0 20 20" fill="#787C7E">
-          <path d="M14.386 12.97a7.5 7.5 0 1 0-1.414 1.414l4.243 4.243 1.414-1.414-4.243-4.243zm-4.886.53a5.5 5.5 0 1 1 0-11 5.5 5.5 0 0 1 0 11z"/>
-        </svg>
-        <input type="text" id="searchInput" placeholder="Search r/INCREDIBLE_x_TECH">
-      </div>
-    </div>
+    <div class="reddit-filter-bar">
+      <div class="filter-bar-content">
+        <div class="filter-left-group">
+          <button class="filter-dropdown-btn active" id="sortDropdownTrigger">
+            <span id="currentSortLabel">Best</span>
+            <svg width="12" height="12" viewBox="0 0 20 20" fill="currentColor">
+              <path d="M5 7l5 5 5-5z"/>
+            </svg>
+          </button>
+          <button class="filter-dropdown-btn" id="filterRegionBtn">
+            <span>Everywhere</span>
+            <svg width="12" height="12" viewBox="0 0 20 20" fill="currentColor">
+              <path d="M5 7l5 5 5-5z"/>
+            </svg>
+          </button>
+        </div>
 
-    <div class="nav-actions-right" id="navAuthArea">
-      <select id="quickDemoSelect" class="form-select form-select-sm d-none d-lg-inline-block" style="width: auto; border-radius: 20px; font-size: 12px;">
-        <option value="">Switch Demo Account</option>
-      </select>
-
-      <button class="reddit-nav-icon-btn d-none d-md-flex" id="navDiscoverBtn" title="Popular Topics">
-        <svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor">
-          <path d="M10 2a8 8 0 1 0 8 8 8 8 0 0 0-8-8zm2.83 5.17l-1.41 4.24-4.24 1.42 1.41-4.25 4.24-1.41z"/>
-        </svg>
-      </button>
-
-      <button class="reddit-nav-icon-btn d-none d-md-flex" id="navChatBtn" title="Chat">
-        <svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor">
-          <path d="M10 2C5.58 2 2 5.13 2 9c0 1.94.88 3.7 2.33 4.98L3.5 18l4.4-1.47C8.59 16.8 9.28 17 10 17c4.42 0 8-3.13 8-7s-3.58-7-8-7z"/>
-        </svg>
-        <span class="reddit-badge-counter">2</span>
-      </button>
-
-      <button class="reddit-nav-icon-btn d-none d-md-flex" id="navBellBtn" title="Notifications">
-        <svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor">
-          <path d="M10 2a4 4 0 0 0-4 4v3.58L4.29 12.3A1 1 0 0 0 5 14h10a1 1 0 0 0 .71-1.7L14 9.58V6a4 4 0 0 0-4-4zm-2 13a2 2 0 0 0 4 0H8z"/>
-        </svg>
-        <span class="reddit-badge-counter">3</span>
-      </button>
-
-      <div id="loggedOutButtons" class="d-flex align-items-center gap-2">
-        <button class="btn-reddit-bordered" id="openLoginBtn">Log In</button>
-        <button class="btn-reddit-solid" id="openSignupBtn">Sign Up</button>
-      </div>
-
-      <div id="loggedInArea" class="d-none align-items-center gap-2">
-        <button class="btn-reddit-orange-solid" id="navbarCreateBtn">
-          <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
-            <path d="M8 2a.75.75 0 0 1 .75.75v4.5h4.5a.75.75 0 0 1 0 1.5h-4.5v4.5a.75.75 0 0 1-1.5 0v-4.5h-4.5a.75.75 0 0 1 0-1.5h4.5v-4.5A.75.75 0 0 1 8 2z"/>
-          </svg>
-          Create
-        </button>
-
-        <div class="user-account-dropdown" id="navProfilePill" role="button">
-          <div class="account-avatar-wrapper">
-            <img class="account-avatar" id="navUserAvatar" src="/media/avatar1.jpg" alt="User">
-            <div class="online-dot"></div>
-          </div>
-          <div class="account-names d-none d-sm-flex">
-            <span class="account-handle" id="navUserName">User</span>
-            <span class="account-karma" id="navUserKarma">0 karma</span>
-          </div>
-          <svg width="12" height="12" viewBox="0 0 20 20" fill="#787C7E">
-            <path d="M5 7l5 5 5-5z"/>
-          </svg>
-
-          <div class="reddit-user-menu-flyout d-none" id="userMenuFlyout">
-            <button class="reddit-user-menu-item" id="menuItemProfile">
-              <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4zm-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h10z"/></svg>
-              View Profile
-            </button>
-            <button class="reddit-user-menu-item" id="menuItemSettings">
-              <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M8 4.754a3.246 3.246 0 1 0 0 6.492 3.246 3.246 0 0 0 0-6.492zM5.754 8a2.246 2.246 0 1 1 4.492 0 2.246 2.246 0 0 1-4.492 0z"/></svg>
-              User Settings
-            </button>
-            <div class="reddit-menu-divider"></div>
-            <button class="reddit-user-menu-item" id="menuItemLogout">
-              <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path fill-rule="evenodd" d="M10 12.5a.5.5 0 0 1-.5.5h-8a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5h8a.5.5 0 0 1 .5.5v2a.5.5 0 0 0 1 0v-2A1.5 1.5 0 0 0 9.5 2h-8A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h8a1.5 1.5 0 0 0 1.5-1.5v-2a.5.5 0 0 0-1 0v2z"/><path fill-rule="evenodd" d="M15.854 8.354a.5.5 0 0 0 0-.708l-3-3a.5.5 0 0 0-.708.708L14.293 7.5H5.5a.5.5 0 0 0 0 1h8.793l-2.147 2.146a.5.5 0 0 0 .708.708l3-3z"/></svg>
-              Log Out
-            </button>
-          </div>
+        <div class="filter-right-group">
+          <button class="filter-dropdown-btn" id="filterViewModeBtn" title="View mode">
+            <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor">
+              <path d="M3 4h14a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1zm1 2v3h12V6H4zm0 5v3h12v-3H4z"/>
+            </svg>
+            <svg width="10" height="10" viewBox="0 0 20 20" fill="currentColor">
+              <path d="M5 7l5 5 5-5z"/>
+            </svg>
+          </button>
         </div>
       </div>
     </div>
   </header>
 
-  <div class="community-banner"></div>
-
-  <div class="community-subheader-bar">
-    <div class="community-subheader-content">
-      <div class="community-avatar-large">ixT</div>
-      <div class="community-title-block">
-        <div>
-          <h1 class="community-main-title">INCREDIBLE_x_TECH</h1>
-          <span class="community-handle-tag">r/INCREDIBLE_x_TECH</span>
-        </div>
-        <button class="reddit-join-btn joined" id="headerJoinBtn">Joined</button>
-        <button class="btn btn-light btn-sm border" id="headerBellBtn" style="border-radius: 50%; width: 32px; height: 32px; padding: 0;" title="Community Notifications">
-          <svg width="14" height="14" viewBox="0 0 20 20" fill="currentColor">
-            <path d="M10 2a4 4 0 0 0-4 4v3.58L4.29 12.3A1 1 0 0 0 5 14h10a1 1 0 0 0 .71-1.7L14 9.58V6a4 4 0 0 0-4-4zm-2 13a2 2 0 0 0 4 0H8z"/>
-          </svg>
-        </button>
-      </div>
-    </div>
-    <div class="reddit-nav-tabs-strip">
-      <a href="#" class="reddit-subtab active" id="subtabPosts">Posts</a>
-      <a href="#" class="reddit-subtab" id="subtabRules">Community Rules</a>
-      <a href="#" class="reddit-subtab" id="subtabWiki">Wiki</a>
-      <a href="#" class="reddit-subtab" id="subtabGuidelines">Architecture Guidelines</a>
-      <a href="#" class="reddit-subtab" id="subtabFaq">FAQ</a>
-    </div>
-  </div>
-
-  <div class="reddit-container">
-    <main class="reddit-feed">
+  <div class="main-content-layout">
+    <main class="feed-stream">
       <div class="quick-create-card" id="feedCreateTrigger" role="button">
         <img class="quick-create-avatar" id="triggerAvatar" src="/media/avatar1.jpg" alt="User">
-        <div class="quick-create-input">Create Post</div>
+        <div class="quick-create-input">Create a discussion or post technical insight...</div>
         <button class="quick-create-media-btn" id="quickImageBtn" title="Create Image Post">
           <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
             <path d="M4 3a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2H4zm12 12H4l4-5 3 3.5 2-2.5 3 4z"/>
           </svg>
         </button>
-        <button class="quick-create-media-btn" id="quickLinkBtn" title="Share Technical Paper">
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
-            <path d="M12.586 4.586a2 2 0 1 1 2.828 2.828l-3 3a2 2 0 0 1-2.828 0 1 1 0 0 0-1.414 1.414 4 4 0 0 0 5.656 0l3-3a4 4 0 0 0-5.656-5.656l-1.5 1.5a1 1 0 1 0 1.414 1.414l1.5-1.5zm-5.172 10.828a2 2 0 0 1-2.828-2.828l3-3a2 2 0 0 1 2.828 0 1 1 0 1 0 1.414-1.414 4 4 0 0 0-5.656 0l-3 3a4 4 0 1 0 5.656 5.656l1.5-1.5a1 1 0 0 0-1.414-1.414l-1.5 1.5z"/>
-          </svg>
-        </button>
-      </div>
-
-      <div class="feed-sort-bar">
-        <div class="sort-pills-wrap">
-          <button class="sort-pill active" data-sort="hot" id="sortHotBtn">
-            <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor">
-              <path d="M12.3 2.1c-.2-.1-.5 0-.6.2C10.7 4.2 9.5 6 9.5 7.8c0 .2 0 .4.1.6C8.8 7.6 8 6.4 8 5.1c0-.3-.2-.5-.5-.5s-.4.2-.5.4C5.7 7.7 4.5 10 4.5 12.3 4.5 16.5 7.9 20 12 20s7.5-3.5 7.5-7.7c0-4.6-3.8-8.5-7.2-10.2zm-.3 15.9c-2.8 0-5-2.2-5-5 0-1.2.5-2.5 1.2-3.6.4 2.2 2 3.6 4.1 3.6.3 0 .5-.2.5-.5 0-1.4.6-2.7 1.6-3.6 1.7 1.8 2.6 4.2 2.6 6.1 0 2.8-2.2 5-5 5z"/>
-            </svg>
-            Hot
-          </button>
-          <button class="sort-pill" data-sort="new" id="sortNewBtn">
-            <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor">
-              <path d="M10 2a8 8 0 1 0 8 8 8 8 0 0 0-8-8zm1 8.5v3.5a1 1 0 0 1-2 0v-4a1 1 0 0 1 1-1h4a1 1 0 0 1 0 2h-3z"/>
-            </svg>
-            New
-          </button>
-          <button class="sort-pill" data-sort="top" id="sortTopBtn">
-            <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor">
-              <path d="M4 11a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-6zm5-5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v11a1 1 0 0 1-1 1h-2a1 1 0 0 1-1-1V6zm5-3a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-2a1 1 0 0 1-1-1V3z"/>
-            </svg>
-            Top
-          </button>
-        </div>
-        <span class="feed-count-tag" id="feedCountTag">15 Technical Discussions</span>
       </div>
 
       <div id="postsFeed">
-        <div class="reddit-post-card p-4 text-center text-secondary">Loading posts...</div>
+        <div class="modern-post-card text-center p-4 text-secondary">Loading discussions...</div>
       </div>
 
-      <div class="load-more-section">
-        <button class="btn-reddit-bordered" id="loadMorePostsBtn">Load More Discussions</button>
+      <div class="infinite-scroll-status" id="infiniteScrollStatus">
+        <button class="btn-login-pill" id="loadMorePostsBtn">Load More Posts</button>
       </div>
     </main>
 
-    <aside class="reddit-sidebar">
-      <div class="sidebar-widget">
-        <div class="sidebar-widget-header">About Community</div>
-        <div class="sidebar-widget-body">
-          <div class="community-icon-title-row">
-            <div class="community-circle-icon">ixT</div>
-            <span class="community-title-text">r/INCREDIBLE_x_TECH</span>
+    <aside class="feed-sidebar">
+      <div class="sidebar-box-card">
+        <div class="sidebar-header-strip">About Community</div>
+        <div class="sidebar-card-body">
+          <div class="sidebar-community-row">
+            <div class="sidebar-snoo-badge">r/</div>
+            <div>
+              <div class="fw-bold" style="font-size: 15px;">r/INCREDIBLE_x_TECH</div>
+              <div class="text-secondary" style="font-size: 12px;">Founded Oct 2026</div>
+            </div>
           </div>
-          <p class="community-about-summary">
-            The premier hub for systems architects, software engineers, and technical pioneers discussing production engineering, distributed systems, and modern computing.
+          <p class="mb-0 text-secondary" style="font-size: 13px; line-height: 1.5;">
+            The central forum for systems architects, distributed systems developers, and performance engineers sharing deep technical insights.
           </p>
-          <div class="community-metrics-grid">
-            <div class="metric-cell">
-              <span class="metric-number" id="statMembers">0</span>
-              <span class="metric-descriptor">Engineers</span>
+          <div class="sidebar-stats-row">
+            <div class="sidebar-stat-column">
+              <span class="sidebar-stat-val" id="statMembers">0</span>
+              <span class="sidebar-stat-txt">Engineers</span>
             </div>
-            <div class="metric-cell">
-              <span class="metric-number" id="statOnline">0</span>
-              <span class="metric-descriptor">Online</span>
+            <div class="sidebar-stat-column">
+              <span class="sidebar-stat-val" id="statOnline">0</span>
+              <span class="sidebar-stat-txt">Online</span>
             </div>
           </div>
-          <div class="text-secondary" style="font-size: 12px;">Created Oct 26, 2026</div>
-          <button class="btn-reddit-solid w-100 justify-content-center" id="sidebarCreateBtn">Create Post</button>
-          <div class="community-topics-wrap">
-            <span class="community-topic-pill">Distributed Systems</span>
-            <span class="community-topic-pill">Low Latency</span>
-            <span class="community-topic-pill">Kernel</span>
-            <span class="community-topic-pill">Microarchitecture</span>
-            <span class="community-topic-pill">Wasm</span>
-          </div>
+          <button class="btn-open-app w-100 justify-content-center" id="sidebarCreateBtn">Create Post</button>
         </div>
       </div>
 
-      <div class="sidebar-widget d-none" id="sidebarUserBox">
-        <div class="sidebar-widget-header">My Profile Summary</div>
-        <div class="sidebar-widget-body">
+      <div class="sidebar-box-card d-none" id="sidebarUserBox">
+        <div class="sidebar-header-strip">My Account</div>
+        <div class="sidebar-card-body">
           <div class="d-flex align-items-center gap-2">
-            <img id="sidebarUserAvatar" class="rounded" src="/media/avatar1.jpg" alt="Avatar" width="44" height="44" style="object-fit: cover;">
+            <img id="sidebarUserAvatar" class="rounded-circle" src="/media/avatar1.jpg" alt="Avatar" width="40" height="40" style="object-fit: cover;">
             <div>
               <div id="sidebarUserDisplayName" class="fw-bold" style="font-size: 14px;">User</div>
               <div id="sidebarUserHandle" class="text-secondary" style="font-size: 12px;">u/user</div>
             </div>
           </div>
           <div id="sidebarUserBio" class="text-secondary" style="font-size: 13px;"></div>
-          <div class="community-metrics-grid">
-            <div class="metric-cell">
-              <span class="metric-number" id="sidebarFollowersCount">0</span>
-              <span class="metric-descriptor">Followers</span>
+          <div class="sidebar-stats-row">
+            <div class="sidebar-stat-column">
+              <span class="sidebar-stat-val" id="sidebarFollowersCount">0</span>
+              <span class="sidebar-stat-txt">Followers</span>
             </div>
-            <div class="metric-cell">
-              <span class="metric-number" id="sidebarFollowingCount">0</span>
-              <span class="metric-descriptor">Following</span>
+            <div class="sidebar-stat-column">
+              <span class="sidebar-stat-val" id="sidebarFollowingCount">0</span>
+              <span class="sidebar-stat-txt">Following</span>
             </div>
           </div>
-          <button class="btn-reddit-bordered w-100 justify-content-center" id="sidebarViewProfileBtn">View Full Profile</button>
+          <button class="btn-login-pill w-100 justify-content-center" id="sidebarViewProfileBtn">View Full Profile</button>
         </div>
       </div>
 
-      <div class="sidebar-widget">
-        <div class="sidebar-widget-header">r/INCREDIBLE_x_TECH Rules</div>
-        <div class="sidebar-widget-body">
-          <ol class="rules-ordered-list">
-            <li>
-              <span class="rule-strong-heading">Technical Substance Only:</span> Posts must provide verifiable engineering depth or architecture discussion.
-            </li>
-            <li>
-              <span class="rule-strong-heading">Respectful Debate:</span> Critique architectural choices and code, never individuals.
-            </li>
-            <li>
-              <span class="rule-strong-heading">Attribute Benchmarks:</span> Cite methodology, hardware configuration, and reproducible data.
-            </li>
-            <li>
-              <span class="rule-strong-heading">No Spam:</span> Unsolicited marketing or low-effort promotional links will be purged.
-            </li>
+      <div class="sidebar-box-card">
+        <div class="sidebar-header-strip">r/INCREDIBLE_x_TECH Rules</div>
+        <div class="sidebar-card-body">
+          <ol class="sidebar-rules-list">
+            <li><strong>Technical depth:</strong> Architecture details and code snippets required.</li>
+            <li><strong>Constructive critique:</strong> Discuss architectures and implementations objectively.</li>
+            <li><strong>Reproducible data:</strong> Provide benchmark methodologies for performance claims.</li>
+            <li><strong>No spam:</strong> Commercial solicitations are prohibited.</li>
           </ol>
         </div>
       </div>
 
-      <div class="sidebar-widget">
-        <div class="sidebar-widget-header">Moderators</div>
-        <div class="sidebar-widget-body">
-          <div class="d-flex flex-column gap-2" style="font-size: 13px;">
-            <a href="#" class="author-link fw-bold" data-username="alex_tech">u/alex_tech</a>
-            <a href="#" class="author-link fw-bold" data-username="sarah_dev">u/sarah_dev</a>
-            <a href="#" class="author-link fw-bold" data-username="marcus_ai">u/marcus_ai</a>
-            <a href="#" class="author-link fw-bold" data-username="elena_code">u/elena_code</a>
-          </div>
-        </div>
-      </div>
-
-      <div class="sidebar-widget">
-        <div class="legal-footer-links">
+      <div class="sidebar-box-card">
+        <div class="sidebar-legal-links">
           <a href="#" id="linkUserAgreement">User Agreement</a>
           <a href="#" id="linkPrivacyPolicy">Privacy Policy</a>
           <a href="#" id="linkContentPolicy">Content Policy</a>
         </div>
-        <div class="legal-copyright-strip">
+        <div class="sidebar-copyright-text">
           INCREDIBLE_x_TECH Inc. © 2026. All rights reserved.
         </div>
       </div>
@@ -293,7 +218,7 @@
 
   <div class="modal fade" id="authModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content" style="border-radius: 4px; border: 1px solid #CCCCCC;">
+      <div class="modal-content" style="border-radius: 8px; border: 1px solid #CCCCCC;">
         <div class="modal-header py-2">
           <h5 class="modal-title fs-6 fw-bold" id="authModalTitle">Log In</h5>
           <button type="button" class="btn-close" id="closeAuthModal" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -321,7 +246,7 @@
               <input type="text" class="form-control" id="authBio" placeholder="Engineering focus or systems interest">
             </div>
             <div id="authError" class="alert alert-danger py-2 mb-0 d-none" style="font-size: 13px;"></div>
-            <button type="submit" class="btn-reddit-solid w-100 justify-content-center mt-2" id="authSubmitBtn">Log In</button>
+            <button type="submit" class="btn-open-app w-100 justify-content-center mt-2" id="authSubmitBtn">Log In</button>
           </form>
         </div>
       </div>
@@ -330,7 +255,7 @@
 
   <div class="modal fade" id="createPostModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
-      <div class="modal-content" style="border-radius: 4px; border: 1px solid #CCCCCC;">
+      <div class="modal-content" style="border-radius: 8px; border: 1px solid #CCCCCC;">
         <div class="modal-header py-2">
           <h5 class="modal-title fs-6 fw-bold">Create a Post in r/INCREDIBLE_x_TECH</h5>
           <button type="button" class="btn-close" id="closeCreateModal" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -339,15 +264,15 @@
           <form id="createPostForm" class="d-flex flex-column gap-3">
             <div>
               <label class="form-label text-uppercase fw-bold text-secondary mb-1" style="font-size: 11px;" for="postTitleInput">Title</label>
-              <input type="text" class="form-control" id="postTitleInput" placeholder="Title of your technical discussion or architecture deep dive" required>
+              <input type="text" class="form-control" id="postTitleInput" placeholder="Title of your discussion or architecture insight" required>
             </div>
             <div>
               <label class="form-label text-uppercase fw-bold text-secondary mb-1" style="font-size: 11px;" for="postContentInput">Body Text</label>
-              <textarea class="form-control" id="postContentInput" rows="5" placeholder="Provide background, technical details, benchmarks, or trade-offs..." required></textarea>
+              <textarea class="form-control" id="postContentInput" rows="5" placeholder="Share technical details, benchmarks, or architectural trade-offs..." required></textarea>
             </div>
             <div>
               <label class="form-label text-uppercase fw-bold text-secondary mb-1" style="font-size: 11px;">Attach Media (Copyright Free)</label>
-              <div class="text-secondary mb-2" style="font-size: 12px;">Select a copyright-free tech image or upload your own:</div>
+              <div class="text-secondary mb-2" style="font-size: 12px;">Choose a downloaded photo or upload your own:</div>
               <div class="media-picker-grid" id="freeMediaGrid"></div>
               <input type="hidden" id="selectedImageUrl" value="">
               <div class="d-flex align-items-center gap-2 mt-2">
@@ -359,7 +284,7 @@
             <div id="postError" class="alert alert-danger py-2 mb-0 d-none" style="font-size: 13px;"></div>
             <div class="modal-footer px-0 pb-0 pt-2 border-top-0">
               <button type="button" class="btn btn-light border" id="cancelCreatePostBtn" data-bs-dismiss="modal">Cancel</button>
-              <button type="submit" class="btn-reddit-solid" id="submitPostBtn">Post</button>
+              <button type="submit" class="btn-open-app" id="submitPostBtn">Post</button>
             </div>
           </form>
         </div>
@@ -369,15 +294,15 @@
 
   <div class="modal fade" id="profileModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
-      <div class="modal-content" style="border-radius: 4px; border: 1px solid #CCCCCC;">
+      <div class="modal-content" style="border-radius: 8px; border: 1px solid #CCCCCC;">
         <div class="modal-header py-2">
           <h5 class="modal-title fs-6 fw-bold" id="profileModalTitle">User Profile</h5>
           <button type="button" class="btn-close" id="closeProfileModal" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body p-3 d-flex flex-column gap-3">
-          <div class="card p-3" style="border: 1px solid #CCCCCC; border-radius: 4px;">
+          <div class="card p-3" style="border: 1px solid #CCCCCC; border-radius: 8px;">
             <div class="d-flex gap-3 align-items-start">
-              <img id="profileViewAvatar" class="rounded border" src="/media/avatar1.jpg" alt="Avatar" width="72" height="72" style="object-fit: cover;">
+              <img id="profileViewAvatar" class="rounded-circle border" src="/media/avatar1.jpg" alt="Avatar" width="72" height="72" style="object-fit: cover;">
               <div class="flex-grow-1">
                 <div class="d-flex justify-content-between align-items-center">
                   <div>
@@ -385,7 +310,7 @@
                     <span class="text-secondary" style="font-size: 13px;" id="profileViewUsername">u/alex_tech</span>
                   </div>
                   <div id="profileActionArea">
-                    <button class="btn-reddit-solid py-1 px-3" id="profileFollowToggleBtn">Follow</button>
+                    <button class="btn-open-app py-1 px-3" id="profileFollowToggleBtn">Follow</button>
                     <button class="btn btn-light btn-sm border d-none" id="profileEditToggleBtn" style="border-radius: 20px;">Edit Profile</button>
                   </div>
                 </div>
@@ -400,7 +325,7 @@
             </div>
           </div>
 
-          <div id="profileEditSection" class="card p-3 bg-light d-none" style="border: 1px solid #CCCCCC; border-radius: 4px;">
+          <div id="profileEditSection" class="card p-3 bg-light d-none" style="border: 1px solid #CCCCCC; border-radius: 8px;">
             <div class="fw-bold mb-2" style="font-size: 13px;">Edit Profile Information</div>
             <form id="profileEditForm" class="d-flex flex-column gap-2">
               <div>
@@ -422,7 +347,7 @@
               </div>
               <div class="d-flex justify-content-end gap-2 mt-2">
                 <button type="button" class="btn btn-light btn-sm border" id="cancelEditProfileBtn">Cancel</button>
-                <button type="submit" class="btn-reddit-solid btn-sm">Save Changes</button>
+                <button type="submit" class="btn-open-app btn-sm">Save Changes</button>
               </div>
             </form>
           </div>
@@ -441,25 +366,23 @@
 
   <div class="modal fade" id="tosModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content" style="border-radius: 4px; border: 1px solid #CCCCCC;">
+      <div class="modal-content" style="border-radius: 8px; border: 1px solid #CCCCCC;">
         <div class="modal-header py-2">
           <h5 class="modal-title fs-6 fw-bold">INCREDIBLE_x_TECH User Agreement</h5>
           <button type="button" class="btn-close" id="closeTosModal" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body p-3 text-secondary" style="font-size: 13px; line-height: 1.6;">
           <h6 class="text-dark fw-bold">1. Acceptance of Terms</h6>
-          <p>By accessing or using the INCREDIBLE_x_TECH platform, you agree to be bound by these Terms of Service. If you disagree with any portion of these terms, you must not access the platform.</p>
-          <h6 class="text-dark fw-bold">2. User Accounts and Responsibilities</h6>
-          <p>You are responsible for maintaining the confidentiality of your account credentials and for all activities that occur under your account.</p>
-          <h6 class="text-dark fw-bold">3. Acceptable Technical Conduct</h6>
-          <p>INCREDIBLE_x_TECH is dedicated to high-quality technical collaboration and engineering discourse. You agree not to post malicious payloads, automated spam, or unauthorized copyrighted material.</p>
-          <h6 class="text-dark fw-bold">4. Intellectual Property and Licenses</h6>
-          <p>You retain ownership of any technical contributions or code snippets you publish on the platform.</p>
-          <h6 class="text-dark fw-bold">5. Limitation of Liability</h6>
-          <p>Code snippets, architectural designs, and benchmarks provided on this platform are for informational purposes only.</p>
+          <p>By accessing or using INCREDIBLE_x_TECH, you agree to comply with all technical community rules and terms.</p>
+          <h6 class="text-dark fw-bold">2. User Accounts and Security</h6>
+          <p>You are responsible for securing your account credentials and for all discussions posted under your identity.</p>
+          <h6 class="text-dark fw-bold">3. Technical Integrity</h6>
+          <p>This platform is exclusively dedicated to architectural discussions and engineering knowledge sharing. Unsolicited commercial promotions are prohibited.</p>
+          <h6 class="text-dark fw-bold">4. Content Ownership</h6>
+          <p>Users retain full ownership of technical posts and code submissions provided on the platform.</p>
         </div>
         <div class="modal-footer py-2">
-          <button class="btn-reddit-solid btn-sm" id="confirmTosBtn" data-bs-dismiss="modal">Acknowledge</button>
+          <button class="btn-open-app btn-sm" id="confirmTosBtn" data-bs-dismiss="modal">Acknowledge</button>
         </div>
       </div>
     </div>
@@ -467,25 +390,21 @@
 
   <div class="modal fade" id="privacyModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content" style="border-radius: 4px; border: 1px solid #CCCCCC;">
+      <div class="modal-content" style="border-radius: 8px; border: 1px solid #CCCCCC;">
         <div class="modal-header py-2">
           <h5 class="modal-title fs-6 fw-bold">INCREDIBLE_x_TECH Privacy Policy</h5>
           <button type="button" class="btn-close" id="closePrivacyModal" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body p-3 text-secondary" style="font-size: 13px; line-height: 1.6;">
-          <h6 class="text-dark fw-bold">1. Information We Collect</h6>
-          <p>We collect information you provide directly to us when creating an account, including username, display name, biography, and the technical posts and comments you submit.</p>
-          <h6 class="text-dark fw-bold">2. Use of Information</h6>
-          <p>We use the collected information to operate and maintain the social media platform, authenticate your identity, and display your technical contributions.</p>
-          <h6 class="text-dark fw-bold">3. Data Storage and Security</h6>
-          <p>User passwords are encrypted using secure cryptographic hashing algorithms.</p>
-          <h6 class="text-dark fw-bold">4. Third-Party Sharing</h6>
-          <p>INCREDIBLE_x_TECH does not sell, rent, or trade your personal information to third parties.</p>
-          <h6 class="text-dark fw-bold">5. Data Retention and Removal</h6>
-          <p>You have the right to request deletion of your account and associated technical posts at any time.</p>
+          <h6 class="text-dark fw-bold">1. Information Collection</h6>
+          <p>We store account metadata, display names, profile biographies, and technical posts submitted by users.</p>
+          <h6 class="text-dark fw-bold">2. Cryptographic Security</h6>
+          <p>Passwords are protected with salted scrypt hashing. Sessions use high-entropy cryptographically random tokens.</p>
+          <h6 class="text-dark fw-bold">3. Data Protection</h6>
+          <p>INCREDIBLE_x_TECH does not trade, sell, or monetize user data.</p>
         </div>
         <div class="modal-footer py-2">
-          <button class="btn-reddit-solid btn-sm" id="confirmPrivacyBtn" data-bs-dismiss="modal">Acknowledge</button>
+          <button class="btn-open-app btn-sm" id="confirmPrivacyBtn" data-bs-dismiss="modal">Acknowledge</button>
         </div>
       </div>
     </div>
