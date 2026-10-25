@@ -11,7 +11,17 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-const uploadDir = path.join(__dirname, 'public', 'uploads');
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(200);
+  }
+  next();
+});
+
+const uploadDir = path.join(__dirname, 'uploads');
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
@@ -42,7 +52,9 @@ const upload = multer({
   }
 });
 
-app.use(express.static(path.join(__dirname, 'public')));
+app.use('/uploads', express.static(uploadDir));
+app.use('/media', express.static(path.join(__dirname, 'media')));
+app.use(express.static(path.join(__dirname, '..', 'frontend')));
 
 function authenticateToken(req, res, next) {
   const authHeader = req.headers['authorization'];
@@ -284,7 +296,7 @@ app.get('/api/users/:username/following', (req, res) => {
   const following = db.prepare(`
     SELECT u.id, u.username, u.display_name, u.avatar_url, u.bio
     FROM followers f
-    JOIN users u ON f.following_id = u.id
+    JOIN users u ON f.follower_id = u.id
     WHERE f.follower_id = ?
     ORDER BY f.created_at DESC
   `).all(targetUser.id);
@@ -685,7 +697,7 @@ app.get('/api/free-media', (req, res) => {
 });
 
 app.use((req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  res.sendFile(path.join(__dirname, '..', 'frontend', 'index.html'));
 });
 
 app.listen(PORT, () => {

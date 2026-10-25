@@ -1,3 +1,5 @@
+const API_BASE = (window.location.protocol === 'file:' || (window.location.port !== '3000' && window.location.port !== '')) ? 'http://localhost:3000' : '';
+
 let currentUser = null;
 let currentSort = 'hot';
 let currentSearch = '';
@@ -102,6 +104,12 @@ const linkContentPolicy = document.getElementById('linkContentPolicy');
 const appToast = document.getElementById('appToast');
 let toastTimer = null;
 
+function resolveUrl(url) {
+  if (!url) return '';
+  if (url.startsWith('http://') || url.startsWith('https://')) return url;
+  return `${API_BASE}${url}`;
+}
+
 function showToast(message) {
   if (toastTimer) clearTimeout(toastTimer);
   appToast.textContent = message;
@@ -148,7 +156,7 @@ async function fetchMe() {
     return;
   }
   try {
-    const res = await fetch('/api/auth/me', { headers: getAuthHeader() });
+    const res = await fetch(`${API_BASE}/api/auth/me`, { headers: getAuthHeader() });
     if (res.ok) {
       const data = await res.json();
       currentUser = data.user;
@@ -167,10 +175,10 @@ function updateAuthUI() {
     loggedOutButtons.style.display = 'none';
     loggedInArea.style.display = 'flex';
     navUserName.textContent = currentUser.username;
-    navUserAvatar.src = currentUser.avatar_url || '/media/avatar1.jpg';
-    triggerAvatar.src = currentUser.avatar_url || '/media/avatar1.jpg';
+    navUserAvatar.src = resolveUrl(currentUser.avatar_url || '/media/avatar1.jpg');
+    triggerAvatar.src = resolveUrl(currentUser.avatar_url || '/media/avatar1.jpg');
     sidebarUserBox.style.display = 'block';
-    sidebarUserAvatar.src = currentUser.avatar_url || '/media/avatar1.jpg';
+    sidebarUserAvatar.src = resolveUrl(currentUser.avatar_url || '/media/avatar1.jpg');
     sidebarUserDisplayName.textContent = currentUser.display_name;
     sidebarUserHandle.textContent = `u/${currentUser.username}`;
     sidebarUserBio.textContent = currentUser.bio || 'Technical engineer on r/INCREDIBLE_x_TECH.';
@@ -180,13 +188,13 @@ function updateAuthUI() {
     loggedOutButtons.style.display = 'flex';
     loggedInArea.style.display = 'none';
     sidebarUserBox.style.display = 'none';
-    triggerAvatar.src = '/media/avatar1.jpg';
+    triggerAvatar.src = resolveUrl('/media/avatar1.jpg');
   }
 }
 
 async function loadDemoUsers() {
   try {
-    const res = await fetch('/api/auth/demo-users');
+    const res = await fetch(`${API_BASE}/api/auth/demo-users`);
     const data = await res.json();
     quickDemoSelect.innerHTML = '<option value="">Switch Demo Account</option>';
     data.users.forEach(u => {
@@ -200,7 +208,7 @@ async function loadDemoUsers() {
 
 async function loginAsDemo(username) {
   try {
-    const res = await fetch('/api/auth/demo-login', {
+    const res = await fetch(`${API_BASE}/api/auth/demo-login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username })
@@ -226,7 +234,7 @@ quickDemoSelect.addEventListener('change', (e) => {
 
 async function loadCommunityStats() {
   try {
-    const res = await fetch('/api/community/stats');
+    const res = await fetch(`${API_BASE}/api/community/stats`);
     const data = await res.json();
     statMembers.textContent = data.members_count;
     statOnline.textContent = data.online_count;
@@ -235,7 +243,7 @@ async function loadCommunityStats() {
 
 async function loadFreeMedia() {
   try {
-    const res = await fetch('/api/free-media');
+    const res = await fetch(`${API_BASE}/api/free-media`);
     const data = await res.json();
     freeMediaList = data.media || [];
     renderFreeMediaGrid();
@@ -249,7 +257,7 @@ function renderFreeMediaGrid() {
     el.className = 'media-picker-item';
     if (selectedMediaUrl === item.url) el.classList.add('selected');
     el.title = item.label;
-    el.innerHTML = `<img src="${item.url}" alt="${item.label}">`;
+    el.innerHTML = `<img src="${resolveUrl(item.url)}" alt="${item.label}">`;
     el.addEventListener('click', () => {
       if (selectedMediaUrl === item.url) {
         selectedMediaUrl = '';
@@ -270,7 +278,7 @@ function renderFreeMediaGrid() {
 async function loadPosts() {
   postsFeed.innerHTML = '<div class="empty-state">Loading posts...</div>';
   try {
-    const url = `/api/posts?sort=${currentSort}&search=${encodeURIComponent(currentSearch)}`;
+    const url = `${API_BASE}/api/posts?sort=${currentSort}&search=${encodeURIComponent(currentSearch)}`;
     const res = await fetch(url, { headers: getAuthHeader() });
     const data = await res.json();
     renderPosts(data.posts || []);
@@ -314,7 +322,7 @@ function renderPosts(posts) {
     if (post.image_url) {
       mediaHtml = `
         <div class="post-image-container">
-          <img class="post-image" src="${escapeHtml(post.image_url)}" alt="Post Media">
+          <img class="post-image" src="${resolveUrl(escapeHtml(post.image_url))}" alt="Post Media">
         </div>
       `;
     }
@@ -357,7 +365,7 @@ function renderPosts(posts) {
             <span class="comments-count-text">${post.comments_count} Comments</span>
           </button>
           <button class="action-btn share-post-btn" data-post-id="${post.id}">
-            <svg viewBox="0 0 16 16"><path d="M13.5 1a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zM11 2.5a2.5 2.5 0 1 1 .603 1.628l-6.718 3.12a2.499 2.499 0 0 1 0 1.504l6.718 3.12a2.5 2.5 0 1 1-.488.876l-6.718-3.12a2.5 2.5 0 1 1 0-3.256l6.718-3.12A2.5 2.5 0 0 1 11 2.5zm-8.5 4a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zm11 5.5a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3z"/></svg>
+            <svg viewBox="0 0 16 16"><path d="M13.5 1a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zM11 2.5a2.5 2.5 0 1 1 .603 1.628l-6.718 3.12a2.499 2.499 0 0 1 0 1.504l6.718 3.12a2.5 2.5 0 1 1-.488.876l-6.718-3.12a2.5 2.5 0 1 1 0-3.256l6.718-3.12A2.5 2.5 0 0 1 11 2.5zm-8.5 4a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zzm11 5.5a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3z"/></svg>
             Share
           </button>
           ${deleteBtnHtml}
@@ -420,7 +428,7 @@ async function handleVote(postId, targetVote, upBtn, downBtn, countEl) {
     return;
   }
   try {
-    const res = await fetch(`/api/posts/${postId}/vote`, {
+    const res = await fetch(`${API_BASE}/api/posts/${postId}/vote`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -454,7 +462,7 @@ async function handleInlineFollow(authorId, buttonEl) {
     return;
   }
   try {
-    const res = await fetch(`/api/users/${authorId}/follow`, {
+    const res = await fetch(`${API_BASE}/api/users/${authorId}/follow`, {
       method: 'POST',
       headers: getAuthHeader()
     });
@@ -477,7 +485,7 @@ async function handleInlineFollow(authorId, buttonEl) {
 async function handleDeletePost(postId) {
   if (!confirm('Are you sure you want to permanently delete this technical discussion?')) return;
   try {
-    const res = await fetch(`/api/posts/${postId}`, {
+    const res = await fetch(`${API_BASE}/api/posts/${postId}`, {
       method: 'DELETE',
       headers: getAuthHeader()
     });
@@ -494,7 +502,7 @@ async function handleDeletePost(postId) {
 async function loadCommentsForPost(postId, container, countTextEl) {
   container.innerHTML = '<div style="font-size: 13px; color: var(--text-muted);">Loading comments...</div>';
   try {
-    const res = await fetch(`/api/posts/${postId}/comments`, { headers: getAuthHeader() });
+    const res = await fetch(`${API_BASE}/api/posts/${postId}/comments`, { headers: getAuthHeader() });
     const data = await res.json();
     renderCommentsSection(postId, data.comments || [], container, countTextEl);
   } catch (err) {
@@ -523,7 +531,7 @@ function renderCommentsSection(postId, comments, container, countTextEl) {
       const text = textarea.value.trim();
       if (!text) return;
       try {
-        const res = await fetch(`/api/posts/${postId}/comments`, {
+        const res = await fetch(`${API_BASE}/api/posts/${postId}/comments`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -575,7 +583,7 @@ function renderCommentsSection(postId, comments, container, countTextEl) {
       }
 
       item.innerHTML = `
-        <img class="comment-avatar" src="${escapeHtml(comment.author.avatar_url || '/media/avatar1.jpg')}" alt="Avatar">
+        <img class="comment-avatar" src="${resolveUrl(escapeHtml(comment.author.avatar_url || '/media/avatar1.jpg'))}" alt="Avatar">
         <div class="comment-body-wrap">
           <div class="comment-header">
             <span class="comment-author" data-username="${escapeHtml(comment.author.username)}">u/${escapeHtml(comment.author.username)}</span>
@@ -597,7 +605,7 @@ function renderCommentsSection(postId, comments, container, countTextEl) {
         delBtn.addEventListener('click', async () => {
           if (!confirm('Delete this comment?')) return;
           try {
-            const res = await fetch(`/api/comments/${comment.id}`, {
+            const res = await fetch(`${API_BASE}/api/comments/${comment.id}`, {
               method: 'DELETE',
               headers: getAuthHeader()
             });
@@ -660,7 +668,7 @@ authForm.addEventListener('submit', async (e) => {
   e.preventDefault();
   authError.style.display = 'none';
   const isSignup = tabSignupBtn.classList.contains('active');
-  const endpoint = isSignup ? '/api/auth/register' : '/api/auth/login';
+  const endpoint = isSignup ? `${API_BASE}/api/auth/register` : `${API_BASE}/api/auth/login`;
 
   const payload = {
     username: authUsername.value.trim(),
@@ -699,7 +707,7 @@ authForm.addEventListener('submit', async (e) => {
 
 logoutBtn.addEventListener('click', async () => {
   try {
-    await fetch('/api/auth/logout', { method: 'POST', headers: getAuthHeader() });
+    await fetch(`${API_BASE}/api/auth/logout`, { method: 'POST', headers: getAuthHeader() });
   } catch (err) {}
   localStorage.removeItem('auth_token');
   currentUser = null;
@@ -761,7 +769,7 @@ createPostForm.addEventListener('submit', async (e) => {
     const formData = new FormData();
     formData.append('image', postImageFile.files[0]);
     try {
-      const upRes = await fetch('/api/upload', {
+      const upRes = await fetch(`${API_BASE}/api/upload`, {
         method: 'POST',
         headers: getAuthHeader(),
         body: formData
@@ -781,7 +789,7 @@ createPostForm.addEventListener('submit', async (e) => {
   }
 
   try {
-    const res = await fetch('/api/posts', {
+    const res = await fetch(`${API_BASE}/api/posts`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -824,7 +832,7 @@ async function refreshProfileView() {
   if (!currentProfileUsername) return;
   profileTabContent.innerHTML = '<div style="font-size: 13px; color: var(--text-muted);">Loading profile data...</div>';
   try {
-    const res = await fetch(`/api/users/${currentProfileUsername}`, { headers: getAuthHeader() });
+    const res = await fetch(`${API_BASE}/api/users/${currentProfileUsername}`, { headers: getAuthHeader() });
     if (!res.ok) {
       profileTabContent.innerHTML = '<div class="empty-state">User not found</div>';
       return;
@@ -833,7 +841,7 @@ async function refreshProfileView() {
     const user = data.user;
 
     profileModalTitle.textContent = `u/${user.username}'s Profile`;
-    profileViewAvatar.src = user.avatar_url || '/media/avatar1.jpg';
+    profileViewAvatar.src = resolveUrl(user.avatar_url || '/media/avatar1.jpg');
     profileViewDisplayName.textContent = user.display_name;
     profileViewUsername.textContent = `u/${user.username}`;
     profileViewBio.textContent = user.bio || 'Technical engineer on r/INCREDIBLE_x_TECH.';
@@ -862,7 +870,7 @@ async function refreshProfileView() {
           showAuthModal('login');
           return;
         }
-        const followRes = await fetch(`/api/users/${user.id}/follow`, {
+        const followRes = await fetch(`${API_BASE}/api/users/${user.id}/follow`, {
           method: 'POST',
           headers: getAuthHeader()
         });
@@ -895,7 +903,7 @@ cancelEditProfileBtn.addEventListener('click', () => {
 profileEditForm.addEventListener('submit', async (e) => {
   e.preventDefault();
   try {
-    const res = await fetch('/api/users/profile', {
+    const res = await fetch(`${API_BASE}/api/users/profile`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -950,7 +958,7 @@ async function loadProfileTabContent(targetUser) {
   profileTabContent.innerHTML = '<div style="font-size: 13px; color: var(--text-muted);">Loading data...</div>';
   if (currentProfileTab === 'posts') {
     try {
-      const res = await fetch(`/api/posts?author=${targetUser.username}&sort=new`, { headers: getAuthHeader() });
+      const res = await fetch(`${API_BASE}/api/posts?author=${targetUser.username}&sort=new`, { headers: getAuthHeader() });
       const data = await res.json();
       const posts = data.posts || [];
       if (posts.length === 0) {
@@ -983,7 +991,7 @@ async function loadProfileTabContent(targetUser) {
     }
   } else if (currentProfileTab === 'followers') {
     try {
-      const res = await fetch(`/api/users/${targetUser.username}/followers`, { headers: getAuthHeader() });
+      const res = await fetch(`${API_BASE}/api/users/${targetUser.username}/followers`, { headers: getAuthHeader() });
       const data = await res.json();
       renderUserList(data.followers || [], 'No followers yet.');
     } catch (err) {
@@ -991,7 +999,7 @@ async function loadProfileTabContent(targetUser) {
     }
   } else if (currentProfileTab === 'following') {
     try {
-      const res = await fetch(`/api/users/${targetUser.username}/following`, { headers: getAuthHeader() });
+      const res = await fetch(`${API_BASE}/api/users/${targetUser.username}/following`, { headers: getAuthHeader() });
       const data = await res.json();
       renderUserList(data.following || [], 'Not following any users yet.');
     } catch (err) {
@@ -1022,7 +1030,7 @@ function renderUserList(users, emptyMessage) {
 
     row.innerHTML = `
       <div class="user-item-info" data-view-username="${escapeHtml(u.username)}">
-        <img class="user-item-avatar" src="${escapeHtml(u.avatar_url || '/media/avatar1.jpg')}" alt="Avatar">
+        <img class="user-item-avatar" src="${resolveUrl(escapeHtml(u.avatar_url || '/media/avatar1.jpg'))}" alt="Avatar">
         <div class="user-item-names">
           <span class="user-item-disp">${escapeHtml(u.display_name)}</span>
           <span class="user-item-user">u/${escapeHtml(u.username)}</span>
@@ -1041,7 +1049,7 @@ function renderUserList(users, emptyMessage) {
     if (fBtn) {
       fBtn.addEventListener('click', async () => {
         try {
-          const res = await fetch(`/api/users/${u.id}/follow`, {
+          const res = await fetch(`${API_BASE}/api/users/${u.id}/follow`, {
             method: 'POST',
             headers: getAuthHeader()
           });
