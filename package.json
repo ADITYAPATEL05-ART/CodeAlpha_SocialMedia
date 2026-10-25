@@ -5,11 +5,11 @@
   "main": "backend/server.js",
   "scripts": {
     "start": "node backend/server.js",
-    "dev": "node --watch backend/server.js",
-    "dev:frontend": "node --watch backend/server.js",
+    "backend": "node backend/server.js",
+    "frontend": "node frontend/server.js",
     "dev:backend": "node --watch backend/server.js",
-    "frontend": "node backend/server.js",
-    "backend": "node backend/server.js"
+    "dev:frontend": "node --watch frontend/server.js",
+    "dev": "node backend/server.js"
   },
   "keywords": [],
   "author": "",
