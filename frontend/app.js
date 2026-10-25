@@ -211,6 +211,9 @@ async function fetchMe() {
 }
 
 function updateAuthUI() {
+  const drawerLoggedOutSection = document.getElementById('drawerLoggedOutSection');
+  const drawerLoggedInSection = document.getElementById('drawerLoggedInSection');
+  const drawerUsernameLabel = document.getElementById('drawerUsernameLabel');
   if (currentUser) {
     loggedOutButtons.classList.add('d-none');
     loggedInArea.classList.remove('d-none');
@@ -225,12 +228,17 @@ function updateAuthUI() {
     sidebarUserBio.textContent = currentUser.bio || 'Systems engineer on r/INCREDIBLE_x_TECH.';
     sidebarFollowersCount.textContent = currentUser.followers_count || 0;
     sidebarFollowingCount.textContent = currentUser.following_count || 0;
+    if (drawerLoggedOutSection) drawerLoggedOutSection.classList.add('d-none');
+    if (drawerLoggedInSection) drawerLoggedInSection.classList.remove('d-none');
+    if (drawerUsernameLabel) drawerUsernameLabel.textContent = `u/${currentUser.username}`;
   } else {
     loggedOutButtons.classList.remove('d-none');
     loggedInArea.classList.add('d-none');
     loggedInArea.classList.remove('d-flex');
     sidebarUserBox.classList.add('d-none');
     triggerAvatar.src = resolveUrl('/media/avatar1.jpg');
+    if (drawerLoggedOutSection) drawerLoggedOutSection.classList.remove('d-none');
+    if (drawerLoggedInSection) drawerLoggedInSection.classList.add('d-none');
   }
 }
 
@@ -738,6 +746,7 @@ function renderCommentsDrawer(postId, comments, container, countLabelEl) {
 function showAuthModal(mode) {
   authError.classList.add('d-none');
   authError.textContent = '';
+  const demoAccountsPanel = document.getElementById('demoAccountsPanel');
   if (mode === 'signup') {
     tabSignupBtn.classList.add('border-primary', 'active');
     tabLoginBtn.classList.remove('border-primary', 'active');
@@ -747,6 +756,7 @@ function showAuthModal(mode) {
     bioGroup.classList.remove('d-none');
     bioGroup.classList.add('d-flex');
     authSubmitBtn.textContent = 'Sign Up';
+    if (demoAccountsPanel) demoAccountsPanel.classList.add('d-none');
   } else {
     tabLoginBtn.classList.add('border-primary', 'active');
     tabSignupBtn.classList.remove('border-primary', 'active');
@@ -756,8 +766,14 @@ function showAuthModal(mode) {
     bioGroup.classList.add('d-none');
     bioGroup.classList.remove('d-flex');
     authSubmitBtn.textContent = 'Log In';
+    if (demoAccountsPanel) demoAccountsPanel.classList.remove('d-none');
   }
-  if (bsAuthModal) bsAuthModal.show();
+  if (bsAuthModal) {
+    bsAuthModal.show();
+  } else if (typeof bootstrap !== 'undefined' && authModalEl) {
+    bsAuthModal = new bootstrap.Modal(authModalEl);
+    bsAuthModal.show();
+  }
 }
 
 tabLoginBtn.addEventListener('click', () => showAuthModal('login'));
@@ -767,8 +783,23 @@ openAppActionBtn.addEventListener('click', () => {
   if (currentUser) {
     openCreatePostModal();
   } else {
-    showAuthModal('signup');
+    showAuthModal('login');
   }
+});
+
+const closeAuthModal = document.getElementById('closeAuthModal');
+if (closeAuthModal) {
+  closeAuthModal.addEventListener('click', () => {
+    if (bsAuthModal) bsAuthModal.hide();
+  });
+}
+
+document.querySelectorAll('.demo-quick-btn').forEach(btn => {
+  btn.addEventListener('click', async () => {
+    const u = btn.getAttribute('data-demo-user');
+    if (bsAuthModal) bsAuthModal.hide();
+    await loginAsDemo(u);
+  });
 });
 
 authForm.addEventListener('submit', async (e) => {
@@ -777,8 +808,12 @@ authForm.addEventListener('submit', async (e) => {
   const isSignup = tabSignupBtn.classList.contains('active');
   const endpoint = isSignup ? '/api/auth/register' : '/api/auth/login';
 
+  let cleanUser = authUsername.value.trim();
+  if (cleanUser.startsWith('u/')) cleanUser = cleanUser.slice(2);
+  else if (cleanUser.startsWith('@')) cleanUser = cleanUser.slice(1);
+
   const payload = {
-    username: authUsername.value.trim(),
+    username: cleanUser,
     password: authPassword.value
   };
 
@@ -1299,9 +1334,84 @@ if (drawerPrivacyBtn) {
   });
 }
 
-headerMoreBtn.addEventListener('click', () => {
-  if (bsTosModal) bsTosModal.show();
+const drawerLoginBtn = document.getElementById('drawerLoginBtn');
+const drawerProfileBtn = document.getElementById('drawerProfileBtn');
+const drawerLogoutBtn = document.getElementById('drawerLogoutBtn');
+
+if (drawerLoginBtn) {
+  drawerLoginBtn.addEventListener('click', () => {
+    closeNavDrawer();
+    showAuthModal('login');
+  });
+}
+if (drawerProfileBtn) {
+  drawerProfileBtn.addEventListener('click', () => {
+    closeNavDrawer();
+    if (currentUser) openUserProfile(currentUser.username);
+  });
+}
+if (drawerLogoutBtn) {
+  drawerLogoutBtn.addEventListener('click', async () => {
+    closeNavDrawer();
+    try {
+      await fetch(`${API_BASE}/api/auth/logout`, { method: 'POST', headers: getAuthHeader() });
+    } catch (err) {}
+    localStorage.removeItem('auth_token');
+    currentUser = null;
+    updateAuthUI();
+    showToast('Logged out');
+    loadPosts();
+  });
+}
+
+const headerMoreMenu = document.getElementById('headerMoreMenu');
+const moreMenuLogin = document.getElementById('moreMenuLogin');
+const moreMenuCreate = document.getElementById('moreMenuCreate');
+const moreMenuRules = document.getElementById('moreMenuRules');
+const moreMenuTos = document.getElementById('moreMenuTos');
+const moreMenuPrivacy = document.getElementById('moreMenuPrivacy');
+
+if (headerMoreBtn && headerMoreMenu) {
+  headerMoreBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    headerMoreMenu.classList.toggle('d-none');
+  });
+}
+
+document.addEventListener('click', () => {
+  if (headerMoreMenu) headerMoreMenu.classList.add('d-none');
 });
+
+if (moreMenuLogin) {
+  moreMenuLogin.addEventListener('click', () => {
+    if (headerMoreMenu) headerMoreMenu.classList.add('d-none');
+    showAuthModal('login');
+  });
+}
+if (moreMenuCreate) {
+  moreMenuCreate.addEventListener('click', () => {
+    if (headerMoreMenu) headerMoreMenu.classList.add('d-none');
+    openCreatePostModal();
+  });
+}
+if (moreMenuRules) {
+  moreMenuRules.addEventListener('click', () => {
+    if (headerMoreMenu) headerMoreMenu.classList.add('d-none');
+    showToast('Viewing r/INCREDIBLE_x_TECH Community Rules');
+  });
+}
+if (moreMenuTos) {
+  moreMenuTos.addEventListener('click', () => {
+    if (headerMoreMenu) headerMoreMenu.classList.add('d-none');
+    if (bsTosModal) bsTosModal.show();
+  });
+}
+if (moreMenuPrivacy) {
+  moreMenuPrivacy.addEventListener('click', () => {
+    if (headerMoreMenu) headerMoreMenu.classList.add('d-none');
+    if (bsPrivacyModal) bsPrivacyModal.show();
+  });
+}
 
 brandLogoBtn.addEventListener('click', () => {
   searchInput.value = '';

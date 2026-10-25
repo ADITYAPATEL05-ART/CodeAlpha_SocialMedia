@@ -169,6 +169,53 @@ body {
   background-color: var(--reddit-pill-bg);
 }
 
+.header-more-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.header-more-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 6px;
+  background-color: #FFFFFF;
+  border: 1px solid var(--reddit-border);
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  min-width: 200px;
+  z-index: 1060;
+  display: flex;
+  flex-direction: column;
+  padding: 6px 0;
+}
+
+.header-more-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 16px;
+  background: none;
+  border: none;
+  width: 100%;
+  text-align: left;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--reddit-text);
+  cursor: pointer;
+}
+
+.header-more-item:hover {
+  background-color: var(--reddit-pill-bg);
+  color: var(--reddit-text);
+}
+
+.demo-quick-btn {
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 14px;
+}
+
 .reddit-search-strip {
   padding: 6px 16px 10px 16px;
   max-width: 760px;

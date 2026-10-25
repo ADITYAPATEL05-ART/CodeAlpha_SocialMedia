@@ -94,7 +94,13 @@ app.post('/api/auth/register', (req, res) => {
   if (!username || !password) {
     return res.status(400).json({ error: 'Username and password are required' });
   }
-  const cleanUsername = username.trim().toLowerCase().replace(/[^a-z0-9_]/g, '');
+  let cleanUsername = username.trim().toLowerCase();
+  if (cleanUsername.startsWith('u/')) {
+    cleanUsername = cleanUsername.slice(2);
+  } else if (cleanUsername.startsWith('@')) {
+    cleanUsername = cleanUsername.slice(1);
+  }
+  cleanUsername = cleanUsername.replace(/[^a-z0-9_]/g, '');
   if (cleanUsername.length < 3) {
     return res.status(400).json({ error: 'Username must be at least 3 characters (letters, numbers, underscores)' });
   }
@@ -136,7 +142,12 @@ app.post('/api/auth/login', (req, res) => {
   if (!username || !password) {
     return res.status(400).json({ error: 'Username and password are required' });
   }
-  const cleanUsername = username.trim().toLowerCase();
+  let cleanUsername = username.trim().toLowerCase();
+  if (cleanUsername.startsWith('u/')) {
+    cleanUsername = cleanUsername.slice(2);
+  } else if (cleanUsername.startsWith('@')) {
+    cleanUsername = cleanUsername.slice(1);
+  }
   const stmt = db.prepare('SELECT * FROM users WHERE username = ?');
   const user = stmt.get(cleanUsername);
   if (!user || !verifyPassword(password, user.password_hash)) {
@@ -167,7 +178,13 @@ app.post('/api/auth/demo-login', (req, res) => {
   if (!username) {
     return res.status(400).json({ error: 'Username required' });
   }
-  const user = db.prepare('SELECT * FROM users WHERE username = ?').get(username);
+  let cleanUsername = username.trim().toLowerCase();
+  if (cleanUsername.startsWith('u/')) {
+    cleanUsername = cleanUsername.slice(2);
+  } else if (cleanUsername.startsWith('@')) {
+    cleanUsername = cleanUsername.slice(1);
+  }
+  const user = db.prepare('SELECT * FROM users WHERE username = ?').get(cleanUsername);
   if (!user) {
     return res.status(404).json({ error: 'Demo user not found' });
   }
