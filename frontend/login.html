@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Log In - INCREDIBLE_x_TECH</title>
+  <link rel="stylesheet" href="/bootstrap.min.css">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+
+  <div class="reddit-drawer-backdrop" id="drawerBackdrop"></div>
+  <aside class="reddit-nav-drawer" id="navDrawer" aria-label="Navigation Drawer">
+    <div class="drawer-header">
+      <a href="/" class="reddit-brand-wordmark" style="text-decoration: none;">
+        <div class="brand-snoo-small">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="#FFFFFF">
+            <path d="M12 2a1 1 0 0 1 1 1v1.07A8.002 8.002 0 0 1 20 12a7.97 7.97 0 0 1-1.3 4.36l1.24 1.25a1 1 0 0 1-1.42 1.41l-1.29-1.29A7.953 7.953 0 0 1 12 20a7.953 7.953 0 0 1-5.23-2.27l-1.29 1.29a1 1 0 0 1-1.42-1.41l1.24-1.25A7.97 7.97 0 0 1 4 12a8.002 8.002 0 0 1 7-7.93V3a1 1 0 0 1 1-1zm0 4a6 6 0 1 0 0 12 6 6 0 0 0 0-12zm-3 5a1.25 1.25 0 1 1 0 2.5 1.25 1.25 0 0 1 0-2.5zm6 0a1.25 1.25 0 1 1 0 2.5 1.25 1.25 0 0 1 0-2.5zm-5 4a3.99 3.99 0 0 0 4 0 1 1 0 1 1 1 1.73 5.99 5.99 0 0 1-6 0 1 1 0 1 1 1-1.73z"/>
+          </svg>
+        </div>
+        <span class="brand-reddit-text">INCREDIBLE_x_TECH</span>
+      </a>
+      <button class="drawer-close-btn" id="drawerCloseBtn" title="Close menu" aria-label="Close menu">✕</button>
+    </div>
+
+    <div class="drawer-body">
+      <div class="drawer-section-title">Feeds</div>
+      <a href="/" class="drawer-nav-item">
+        <span class="drawer-icon-wrap">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path d="M10.707 2.293a1 1 0 0 0-1.414 0l-7 7a1 1 0 0 0 1.414 1.414L4 10.414V17a1 1 0 0 0 1 1h4v-4h2v4h4a1 1 0 0 0 1-1v-6.586l.293.293a1 1 0 0 0 1.414-1.414l-7-7z"/></svg>
+        </span>
+        <span>Home Feed</span>
+      </a>
+
+      <div class="drawer-divider"></div>
+
+      <div class="drawer-section-title">Resources</div>
+      <a href="/rules.html" class="drawer-nav-item">
+        <span class="drawer-icon-wrap">
+          <svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor"><path d="M9 2a1 1 0 0 0 0 2h2a1 1 0 1 0 0-2H9z"/><path fill-rule="evenodd" d="M4 5a2 2 0 0 1 2-2 3 3 0 0 0 3 3h2a3 3 0 0 0 3-3 2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5zm3 4a1 1 0 0 0 0 2h6a1 1 0 1 0 0-2H7zm0 4a1 1 0 1 0 0 2h6a1 1 0 1 0 0-2H7z"/></svg>
+        </span>
+        <span>Community Rules</span>
+      </a>
+      <a href="/terms.html" class="drawer-nav-item">
+        <span class="drawer-icon-wrap">
+          <svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 4a2 2 0 0 1 2-2h4.586A2 2 0 0 1 12 2.586L15.414 6A2 2 0 0 1 16 7.414V16a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4z"/></svg>
+        </span>
+        <span>User Agreement</span>
+      </a>
+      <a href="/privacy.html" class="drawer-nav-item">
+        <span class="drawer-icon-wrap">
+          <svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 2a1 1 0 0 1 1 1v1.323l3.954 1.582A1 1 0 0 1 15.5 6.834v4.666c0 3.86-2.915 6.132-5.185 7.378a1 1 0 0 1-.63 0C7.415 17.632 4.5 15.36 4.5 11.5V6.834a1 1 0 0 1 .546-.929L9 4.323V3a1 1 0 0 1 1-1z"/></svg>
+        </span>
+        <span>Privacy Policy</span>
+      </a>
+    </div>
+  </aside>
+
+  <header class="reddit-top-header">
+    <div class="reddit-primary-nav">
+      <div class="nav-left-cluster">
+        <button class="hamburger-btn" id="navHamburgerBtn" title="Menu" aria-label="Menu">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+          </svg>
+        </button>
+        <a href="/" class="reddit-brand-wordmark" style="text-decoration: none;">
+          <div class="brand-snoo-small">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="#FFFFFF">
+              <path d="M12 2a1 1 0 0 1 1 1v1.07A8.002 8.002 0 0 1 20 12a7.97 7.97 0 0 1-1.3 4.36l1.24 1.25a1 1 0 0 1-1.42 1.41l-1.29-1.29A7.953 7.953 0 0 1 12 20a7.953 7.953 0 0 1-5.23-2.27l-1.29 1.29a1 1 0 0 1-1.42-1.41l1.24-1.25A7.97 7.97 0 0 1 4 12a8.002 8.002 0 0 1 7-7.93V3a1 1 0 0 1 1-1zm0 4a6 6 0 1 0 0 12 6 6 0 0 0 0-12zm-3 5a1.25 1.25 0 1 1 0 2.5 1.25 1.25 0 0 1 0-2.5zm6 0a1.25 1.25 0 1 1 0 2.5 1.25 1.25 0 0 1 0-2.5zm-5 4a3.99 3.99 0 0 0 4 0 1 1 0 1 1 1 1.73 5.99 5.99 0 0 1-6 0 1 1 0 1 1 1-1.73z"/>
+            </svg>
+          </div>
+          <span class="brand-reddit-text">INCREDIBLE_x_TECH</span>
+        </a>
+      </div>
+
+      <div class="nav-right-cluster">
+        <a href="/" class="btn-open-app text-decoration-none">Home Feed</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="auth-page-container">
+    <div class="standalone-page-card p-4">
+      <div class="text-center mb-3">
+        <div class="brand-snoo-small mx-auto mb-2" style="width: 44px; height: 44px;">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="#FFFFFF">
+            <path d="M12 2a1 1 0 0 1 1 1v1.07A8.002 8.002 0 0 1 20 12a7.97 7.97 0 0 1-1.3 4.36l1.24 1.25a1 1 0 0 1-1.42 1.41l-1.29-1.29A7.953 7.953 0 0 1 12 20a7.953 7.953 0 0 1-5.23-2.27l-1.29 1.29a1 1 0 0 1-1.42-1.41l1.24-1.25A7.97 7.97 0 0 1 4 12a8.002 8.002 0 0 1 7-7.93V3a1 1 0 0 1 1-1zm0 4a6 6 0 1 0 0 12 6 6 0 0 0 0-12zm-3 5a1.25 1.25 0 1 1 0 2.5 1.25 1.25 0 0 1 0-2.5zm6 0a1.25 1.25 0 1 1 0 2.5 1.25 1.25 0 0 1 0-2.5zm-5 4a3.99 3.99 0 0 0 4 0 1 1 0 1 1 1 1.73 5.99 5.99 0 0 1-6 0 1 1 0 1 1 1-1.73z"/>
+          </svg>
+        </div>
+        <h2 class="fw-bold fs-5 mb-1" id="formHeaderTitle">Log In to INCREDIBLE_x_TECH</h2>
+        <div class="text-secondary" style="font-size: 13px;">Join high performance engineering discussions</div>
+      </div>
+
+      <div class="btn-group w-100 mb-3" role="group">
+        <button type="button" class="btn btn-light border fw-bold active" id="tabLogin">Log In</button>
+        <button type="button" class="btn btn-light border fw-bold" id="tabSignup">Sign Up</button>
+      </div>
+
+      <div class="p-2 mb-3 bg-light rounded border text-center" id="demoBlock">
+        <div class="text-secondary mb-1 fw-bold" style="font-size: 11px; text-transform: uppercase;">Quick 1-Click Demo Login:</div>
+        <div class="d-flex flex-wrap gap-2 justify-content-center">
+          <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-2 demo-btn" data-user="alex_tech">u/alex_tech</button>
+          <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-2 demo-btn" data-user="sarah_dev">u/sarah_dev</button>
+          <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-2 demo-btn" data-user="marcus_ai">u/marcus_ai</button>
+          <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-2 demo-btn" data-user="elena_code">u/elena_code</button>
+        </div>
+      </div>
+
+      <form id="loginPageForm" class="d-flex flex-column gap-3">
+        <div id="dispNameGroup" class="d-none flex-column gap-1">
+          <label class="form-label text-uppercase fw-bold text-secondary mb-0" style="font-size: 11px;" for="dispInput">Display Name (Optional)</label>
+          <input type="text" class="form-control" id="dispInput" placeholder="e.g. Alex Rivera">
+        </div>
+        <div class="d-flex flex-column gap-1">
+          <label class="form-label text-uppercase fw-bold text-secondary mb-0" style="font-size: 11px;" for="userInput">Username</label>
+          <input type="text" class="form-control" id="userInput" placeholder="e.g. alex_tech" required>
+        </div>
+        <div class="d-flex flex-column gap-1">
+          <label class="form-label text-uppercase fw-bold text-secondary mb-0" style="font-size: 11px;" for="passInput">Password</label>
+          <input type="password" class="form-control" id="passInput" placeholder="Minimum 4 characters" required>
+        </div>
+        <div id="bioInputGroup" class="d-none flex-column gap-1">
+          <label class="form-label text-uppercase fw-bold text-secondary mb-0" style="font-size: 11px;" for="bioInput">Bio (Optional)</label>
+          <input type="text" class="form-control" id="bioInput" placeholder="Engineering focus or systems interest">
+        </div>
+
+        <div id="pageAuthError" class="alert alert-danger py-2 mb-0 d-none" style="font-size: 13px;"></div>
+
+        <button type="submit" class="btn-open-app w-100 justify-content-center" id="submitBtn">Log In</button>
+      </form>
+    </div>
+  </main>
+
+  <script>
+    const navDrawer = document.getElementById('navDrawer');
+    const drawerBackdrop = document.getElementById('drawerBackdrop');
+    const navHamburgerBtn = document.getElementById('navHamburgerBtn');
+    const drawerCloseBtn = document.getElementById('drawerCloseBtn');
+
+    function openDrawer() {
+      navDrawer.classList.add('open');
+      drawerBackdrop.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeDrawer() {
+      navDrawer.classList.remove('open');
+      drawerBackdrop.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    if (navHamburgerBtn) navHamburgerBtn.addEventListener('click', openDrawer);
+    if (drawerCloseBtn) drawerCloseBtn.addEventListener('click', closeDrawer);
+    if (drawerBackdrop) drawerBackdrop.addEventListener('click', closeDrawer);
+
+    const tabLogin = document.getElementById('tabLogin');
+    const tabSignup = document.getElementById('tabSignup');
+    const formHeaderTitle = document.getElementById('formHeaderTitle');
+    const dispNameGroup = document.getElementById('dispNameGroup');
+    const bioInputGroup = document.getElementById('bioInputGroup');
+    const demoBlock = document.getElementById('demoBlock');
+    const submitBtn = document.getElementById('submitBtn');
+    const userInput = document.getElementById('userInput');
+    const passInput = document.getElementById('passInput');
+    const dispInput = document.getElementById('dispInput');
+    const bioInput = document.getElementById('bioInput');
+    const pageAuthError = document.getElementById('pageAuthError');
+    const loginPageForm = document.getElementById('loginPageForm');
+
+    tabLogin.addEventListener('click', () => {
+      tabLogin.classList.add('active');
+      tabSignup.classList.remove('active');
+      formHeaderTitle.textContent = 'Log In to INCREDIBLE_x_TECH';
+      dispNameGroup.classList.add('d-none');
+      dispNameGroup.classList.remove('d-flex');
+      bioInputGroup.classList.add('d-none');
+      bioInputGroup.classList.remove('d-flex');
+      demoBlock.classList.remove('d-none');
+      submitBtn.textContent = 'Log In';
+      pageAuthError.classList.add('d-none');
+    });
+
+    tabSignup.addEventListener('click', () => {
+      tabSignup.classList.add('active');
+      tabLogin.classList.remove('active');
+      formHeaderTitle.textContent = 'Create an INCREDIBLE_x_TECH Account';
+      dispNameGroup.classList.remove('d-none');
+      dispNameGroup.classList.add('d-flex');
+      bioInputGroup.classList.remove('d-none');
+      bioInputGroup.classList.add('d-flex');
+      demoBlock.classList.add('d-none');
+      submitBtn.textContent = 'Sign Up';
+      pageAuthError.classList.add('d-none');
+    });
+
+    document.querySelectorAll('.demo-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const username = btn.getAttribute('data-user');
+        try {
+          const res = await fetch('/api/auth/demo-login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username })
+          });
+          const data = await res.json();
+          if (res.ok) {
+            localStorage.setItem('auth_token', data.token);
+            window.location.href = '/';
+          } else {
+            pageAuthError.textContent = data.error || 'Failed to log in';
+            pageAuthError.classList.remove('d-none');
+          }
+        } catch (err) {
+          pageAuthError.textContent = 'Network error during login';
+          pageAuthError.classList.remove('d-none');
+        }
+      });
+    });
+
+    loginPageForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      pageAuthError.classList.add('d-none');
+      const isSignup = tabSignup.classList.contains('active');
+      const endpoint = isSignup ? '/api/auth/register' : '/api/auth/login';
+
+      let cleanUser = userInput.value.trim();
+      if (cleanUser.startsWith('u/')) cleanUser = cleanUser.slice(2);
+      else if (cleanUser.startsWith('@')) cleanUser = cleanUser.slice(1);
+
+      const payload = {
+        username: cleanUser,
+        password: passInput.value
+      };
+      if (isSignup) {
+        payload.display_name = dispInput.value.trim();
+        payload.bio = bioInput.value.trim();
+      }
+
+      try {
+        const res = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (res.ok) {
+          localStorage.setItem('auth_token', data.token);
+          window.location.href = '/';
+        } else {
+          pageAuthError.textContent = data.error || 'Authentication error';
+          pageAuthError.classList.remove('d-none');
+        }
+      } catch (err) {
+        pageAuthError.textContent = 'Server connection error';
+        pageAuthError.classList.remove('d-none');
+      }
+    });
+  </script>
+</body>
+</html>

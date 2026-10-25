@@ -732,6 +732,12 @@ app.get('/api/free-media', (req, res) => {
   res.json({ media: mediaFiles });
 });
 
+app.get('/rules', (req, res) => res.sendFile(path.join(__dirname, '..', 'frontend', 'rules.html')));
+app.get('/terms', (req, res) => res.sendFile(path.join(__dirname, '..', 'frontend', 'terms.html')));
+app.get('/privacy', (req, res) => res.sendFile(path.join(__dirname, '..', 'frontend', 'privacy.html')));
+app.get('/about', (req, res) => res.sendFile(path.join(__dirname, '..', 'frontend', 'about.html')));
+app.get('/login', (req, res) => res.sendFile(path.join(__dirname, '..', 'frontend', 'login.html')));
+
 app.use((req, res) => {
   res.sendFile(path.join(__dirname, '..', 'frontend', 'index.html'));
 });
